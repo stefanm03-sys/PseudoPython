@@ -206,7 +206,7 @@
 
                 <div class="output-label">PseudoPy Examples:</div>
                 <div
-                    style="background: #f9f9f9; padding: 10px; border-radius: 5px; font-size: 0.9em; color: #666; white-space: pre;">
+                    style="background: #ffffff; padding: 10px; border-radius: 5px; font-size: 0.9em; color: #423e81; white-space: pre;">
                     var x is 2
                     state(x)
                     var y is 0
@@ -233,18 +233,9 @@
             console.log("Pyodide loaded successfully");
         }
 
-        // load pseudo.ppy from GitHub so users see it as the starting example
-        async function loadExample() {
-            const url = 'https://raw.githubusercontent.com/stefanm03-sys/pseudopy/main/pseudo.ppy';
-            try {
-                const resp = await fetch(url);
-                if (resp.ok) {
-                    const text = await resp.text();
-                    document.getElementById('codeInput').value = text;
-                }
-            } catch (e) {
-                console.warn('Failed to load pseudo.ppy example:', e);
-            }
+        // set initial input to fixed example
+        function loadExample() {
+            document.getElementById('codeInput').value = 'state("Hello World")';
         }
 
         async function runCode() {
