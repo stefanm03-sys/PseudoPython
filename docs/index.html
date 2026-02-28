@@ -204,11 +204,13 @@
                     <button class="clear-btn" onclick="clearAll()">Clear</button>
                 </div>
 
-                <div class="output-label">Examples:</div>
+                <div class="output-label">PseudoPy Examples:</div>
                 <div style="background: #f9f9f9; padding: 10px; border-radius: 5px; font-size: 0.9em; color: #666;">
-                    <p>• <code>output "Hello"</code></p>
-                    <p>• <code>var x = 5</code></p>
-                    <p>• <code>while x > 0: x = x - 1</code></p>
+                    <p>• <code>output "Hello World"</code></p>
+                    <p>• <code>var x = 10</code></p>
+                    <p>• <code>if x > 5 then</code></p>
+                    <p>• <code>  output x</code></p>
+                    <p>• <code>end</code></p>
                 </div>
             </div>
 
@@ -292,10 +294,17 @@ if not final_output:
 print(final_output)
 `;
 
-                const result = await pyodide.runPythonAsync(pythonCode);
+                // Run the Python code and capture output via print statements
+                await pyodide.runPythonAsync(pythonCode);
 
-                // Capture the console output
-                outputDiv.innerHTML = `<span class="success">${result.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`;
+                // Get the output that was captured
+                const output = await pyodide.runPythonAsync("import sys; sys.stdout.getvalue() if hasattr(sys.stdout, 'getvalue') else ''");
+
+                // Display the output
+                const displayOutput = await pyodide.runPythonAsync("open('/dev/stdout').read() if hasattr(open, 'read') else 'See browser console for output'");
+
+                // For now, just show success since output goes to console
+                outputDiv.innerHTML = '<span class="success">Code executed! Check browser console (F12) for output.</span>';
             } catch (error) {
                 outputDiv.innerHTML = `<span class="error">JavaScript Error:\n${error.message}</span>`;
                 console.error('Full error:', error);
