@@ -1,5 +1,14 @@
+# Ignore Python cache
 __pycache__/
 *.pyc
+
+# Ignore large system directories accidentally present in workspace
+Git/
+dev/
+etc/
+mingw64/
+tmp/
+usr/
 
 # prevent bulky Git internals and other junk in the docs site
 docs/Git/
