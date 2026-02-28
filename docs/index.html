@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -138,8 +139,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         #output {
@@ -179,6 +185,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -246,7 +253,7 @@
             try {
                 // Capture output
                 let output = '';
-                
+
                 // Override print to capture output
                 const pythonCode = `
 import sys
@@ -282,11 +289,12 @@ exec(pseudopy_code)
         window.addEventListener('load', initPyodide);
 
         // Allow Ctrl+Enter to run code
-        document.getElementById('codeInput').addEventListener('keydown', function(e) {
+        document.getElementById('codeInput').addEventListener('keydown', function (e) {
             if (e.ctrlKey && e.key === 'Enter') {
                 runCode();
             }
         });
     </script>
 </body>
+
 </html>
