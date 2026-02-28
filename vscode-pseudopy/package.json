@@ -1,0 +1,30 @@
+{
+  "name": "pseudopy-language",
+  "displayName": "PseudoPy Language",
+  "description": "Syntax highlighting for .ppy files",
+  "version": "0.0.1",
+  "publisher": "stefa-local",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "pseudopy",
+        "aliases": ["PseudoPy", "pseudopy"],
+        "extensions": [".ppy"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "pseudopy",
+        "scopeName": "source.pseudopy",
+        "path": "./syntaxes/pseudopy.tmLanguage.json"
+      }
+    ]
+  }
+}

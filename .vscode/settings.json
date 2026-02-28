@@ -1,0 +1,16 @@
+{
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "scope": "keyword.control.pseudopy",
+        "settings": {
+          "foreground": "#804eff",
+          "fontStyle": "bold"
+        }
+      }
+    ]
+  },
+  "files.associations": {
+    "*.ppy": "pseudopy"
+  }
+}
