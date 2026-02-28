@@ -267,58 +267,31 @@ import sys
 import io
 from contextlib import redirect_stdout, redirect_stderr
 
-# Create output buffer
-output_buffer = io.StringIO()
-
-try:
-    # Try to use the actual PseudoPy interpreter
+buf = io.StringIO()
+with redirect_stdout(buf), redirect_stderr(buf):
     try:
         from lexer import tokenize
         from parser import parse
         from interpreter import interpret
-        
         pseudopy_code = """${code.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"""
-        
-        with redirect_stdout(output_buffer), redirect_stderr(output_buffer):
-            tokens = tokenize(pseudopy_code)
-            ast = parse(tokens)
-            interpret(ast)
-        
-    except (ImportError, ModuleNotFoundError, SyntaxError) as e:
-        # Fallback: run as Python with error info
-        print(f"Note: PseudoPy modules not available, running as Python instead")
-        print(f"Import error: {e}\\n")
-        
-        with redirect_stdout(output_buffer), redirect_stderr(output_buffer):
-            try:
-                exec("""${code.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}""")
-            except Exception as py_error:
-                print(f"Python Error: {type(py_error).__name__}: {py_error}")
-                
-except Exception as e:
-    import traceback
-    print(f"Error: {type(e).__name__}: {e}")
-    print(traceback.format_exc())
+        tokens = tokenize(pseudopy_code)
+        ast = parse(tokens)
+        interpret(ast)
+    except Exception as e:
+        # fallback to python execution if interpreter fails
+        try:
+            exec("""${code.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}""")
+        except Exception as py_err:
+            print(f"Execution error: {type(py_err).__name__}: {py_err}")
 
-# Get the captured output
-final_output = output_buffer.getvalue()
-if not final_output:
-    final_output = "(program completed with no output)"
-
-print(final_output)
+output = buf.getvalue()
+if not output:
+    output = "(no output)"
+print(output)
 `;
 
-                // Run the Python code and capture output via print statements
-                await pyodide.runPythonAsync(pythonCode);
-
-                // Get the output that was captured
-                const output = await pyodide.runPythonAsync("import sys; sys.stdout.getvalue() if hasattr(sys.stdout, 'getvalue') else ''");
-
-                // Display the output
-                const displayOutput = await pyodide.runPythonAsync("open('/dev/stdout').read() if hasattr(open, 'read') else 'See browser console for output'");
-
-                // For now, just show success since output goes to console
-                outputDiv.innerHTML = '<span class="success">Code executed! Check browser console (F12) for output.</span>';
+                const result = await pyodide.runPythonAsync(pythonCode);
+                outputDiv.innerHTML = `<span class="success">${result.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`;
             } catch (error) {
                 outputDiv.innerHTML = `<span class="error">JavaScript Error:\n${error.message}</span>`;
                 console.error('Full error:', error);
