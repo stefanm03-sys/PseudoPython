@@ -243,33 +243,57 @@
                 return;
             }
 
-            outputDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Running code...</div>';
+            outputDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Running PseudoPy code...</div>';
 
             try {
-                // Capture output
-                let output = '';
-
-                // Override print to capture output
+                // Capture stdout and stderr
                 const pythonCode = `
 import sys
 import io
-from contextlib import redirect_stdout
+from contextlib import redirect_stdout, redirect_stderr
 
-# Capture stdout
-captured_output = io.StringIO()
+# Capture both stdout and stderr
+output_capture = io.StringIO()
+error_capture = io.StringIO()
 
-# Simple PseudoPy interpreter simulation
-# For now, we'll just execute the code as Python with modified syntax
+try:
+    # Try to use the actual PseudoPy interpreter if modules are loaded
+    try:
+        from lexer import tokenize
+        from parser import parse
+        from interpreter import interpret
+        
+        pseudopy_code = """${code.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"""
+        
+        with redirect_stdout(output_capture), redirect_stderr(error_capture):
+            tokens = tokenize(pseudopy_code)
+            ast = parse(tokens)
+            interpret(ast)
+        
+        output = output_capture.getvalue()
+        if not output:
+            output = "(no output)"
+    except (ImportError, ModuleNotFoundError) as e:
+        # Fallback: run as Python
+        with redirect_stdout(output_capture), redirect_stderr(error_capture):
+            exec("""${code.replace(/"/g, '\\"').replace(/\n/g, '\\n')}""")
+        output = output_capture.getvalue()
+        if not output:
+            output = "(no output)"
+except Exception as e:
+    output = f"Error: {type(e).__name__}: {str(e)}"
+    stderr = error_capture.getvalue()
+    if stderr:
+        output += f"\\n{stderr}"
 
-pseudopy_code = """${code.replace(/\"/g, '\\\"')}"""
-
-# You can add your custom interpreter logic here
-# For now, we'll just run a simple interpreter
-exec(pseudopy_code)
+print(output)
 `;
 
-                const result = await pyodide.runPythonAsync(pythonCode);
-                outputDiv.innerHTML = '<span class="success">Code executed successfully!</span>';
+                await pyodide.runPythonAsync(pythonCode);
+
+                // Retrieve the output
+                const finalOutput = await pyodide.runPythonAsync("import sys; print(output, end='')");
+                outputDiv.innerHTML = `<span class="success">${finalOutput || '(no output)'}</span>`;
             } catch (error) {
                 outputDiv.innerHTML = `<span class="error">Error:\n${error.message}</span>`;
             }
