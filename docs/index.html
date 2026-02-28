@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PseudoPy Online Interpreter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 30px;
+            min-height: 500px;
+        }
+
+        .section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        textarea {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: none;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .run-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .run-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .run-btn:active {
+            transform: translateY(0);
+        }
+
+        .clear-btn {
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .clear-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-weight: bold;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #output {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 200px;
+        }
+
+        .output-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .error {
+            color: #d32f2f;
+        }
+
+        .success {
+            color: #388e3c;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐍 PseudoPy Online</h1>
+            <p>Write and run PseudoPy code directly in your browser</p>
+        </div>
+
+        <div class="content">
+            <div class="section input-section">
+                <h2>Code Editor</h2>
+                <textarea id="codeInput" placeholder="// Enter your PseudoPy code here...
+// Example:
+// output &quot;Hello, World!&quot;
+// var x = 10
+// if x > 5 then
+//     output x
+// end"></textarea>
+
+                <div class="button-group">
+                    <button class="run-btn" onclick="runCode()">▶ Run Code</button>
+                    <button class="clear-btn" onclick="clearAll()">Clear</button>
+                </div>
+
+                <div class="output-label">Examples:</div>
+                <div style="background: #f9f9f9; padding: 10px; border-radius: 5px; font-size: 0.9em; color: #666;">
+                    <p>• <code>output "Hello"</code></p>
+                    <p>• <code>var x = 5</code></p>
+                    <p>• <code>while x > 0: x = x - 1</code></p>
+                </div>
+            </div>
+
+            <div class="section output-section">
+                <h2>Output</h2>
+                <div class="output-label">Program output and errors will appear below:</div>
+                <div id="output"></div>
+            </div>
+        </div>
+    </div>
+
+    <script async src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+    <script>
+        let pyodide;
+
+        async function initPyodide() {
+            pyodide = await loadPyodide();
+            console.log("Pyodide loaded successfully");
+        }
+
+        async function runCode() {
+            if (!pyodide) {
+                document.getElementById('output').innerHTML = '<span class="error">Loading Python runtime...</span>';
+                await initPyodide();
+            }
+
+            const code = document.getElementById('codeInput').value;
+            const outputDiv = document.getElementById('output');
+
+            if (!code.trim()) {
+                outputDiv.innerHTML = '<span class="error">Please enter some code first!</span>';
+                return;
+            }
+
+            outputDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Running code...</div>';
+
+            try {
+                // Capture output
+                let output = '';
+                
+                // Override print to capture output
+                const pythonCode = `
+import sys
+import io
+from contextlib import redirect_stdout
+
+# Capture stdout
+captured_output = io.StringIO()
+
+# Simple PseudoPy interpreter simulation
+# For now, we'll just execute the code as Python with modified syntax
+
+pseudopy_code = """${code.replace(/"/g, '\\"')}"""
+
+# You can add your custom interpreter logic here
+# For now, we'll just run a simple interpreter
+exec(pseudopy_code)
+`;
+
+                const result = await pyodide.runPythonAsync(pythonCode);
+                outputDiv.innerHTML = '<span class="success">Code executed successfully!</span>';
+            } catch (error) {
+                outputDiv.innerHTML = `<span class="error">Error:\n${error.message}</span>`;
+            }
+        }
+
+        function clearAll() {
+            document.getElementById('codeInput').value = '';
+            document.getElementById('output').innerHTML = '';
+        }
+
+        // Initialize Pyodide when page loads
+        window.addEventListener('load', initPyodide);
+
+        // Allow Ctrl+Enter to run code
+        document.getElementById('codeInput').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                runCode();
+            }
+        });
+    </script>
+</body>
+</html>
