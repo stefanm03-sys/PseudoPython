@@ -1,5 +1,9 @@
 __pycache__/
 *.pyc
 
+# prevent bulky Git internals and other junk in the docs site
+docs/Git/
+docs/**/doc/
+
 # GitHub Pages build (optional)
 # (don't ignore docs/, we want to publish these files)
