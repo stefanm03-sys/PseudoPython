@@ -4,8 +4,6 @@ var x is 2
 state(x)
 
 var y is 0
-repeat amt(5)
-    state(x)
+when x > 1 do
+    state("x is greater than 1")
 endpt
-
-var x is 2
