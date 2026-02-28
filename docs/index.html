@@ -231,6 +231,20 @@
             console.log("Pyodide loaded successfully");
         }
 
+        // load pseudo.ppy from GitHub so users see it as the starting example
+        async function loadExample() {
+            const url = 'https://raw.githubusercontent.com/stefanm03-sys/pseudopy/main/pseudo.ppy';
+            try {
+                const resp = await fetch(url);
+                if (resp.ok) {
+                    const text = await resp.text();
+                    document.getElementById('codeInput').value = text;
+                }
+            } catch (e) {
+                console.warn('Failed to load pseudo.ppy example:', e);
+            }
+        }
+
         async function runCode() {
             if (!pyodide) {
                 document.getElementById('output').innerHTML = '<span class="error">Loading Python runtime...</span>';
@@ -316,8 +330,11 @@ print(final_output)
             document.getElementById('output').innerHTML = '';
         }
 
-        // Initialize Pyodide when page loads
-        window.addEventListener('load', initPyodide);
+        // Initialize Pyodide and load example when page loads
+        window.addEventListener('load', () => {
+            initPyodide();
+            loadExample();
+        });
 
         // Allow Ctrl+Enter to run code
         document.getElementById('codeInput').addEventListener('keydown', function (e) {
