@@ -2,4 +2,4 @@ __pycache__/
 *.pyc
 
 # GitHub Pages build (optional)
-docs/
+# (don't ignore docs/, we want to publish these files)
