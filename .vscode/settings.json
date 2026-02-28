@@ -4,7 +4,7 @@
       {
         "scope": "keyword.control.pseudopy",
         "settings": {
-          "foreground": "#804eff",
+          "foreground": "#7cb0ec",
           "fontStyle": "bold"
         }
       }
