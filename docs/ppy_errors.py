@@ -19,6 +19,8 @@ ERROR_TEMPLATES = {
     "PPY-TYPE-004": "[PPY-TYPE-004] ask(prompt, data?) requires prompt to be a string, you gave me {actual_type}",
     "PPY-TYPE-005": "[PPY-TYPE-005] ask(prompt, data?) data parameter must be a string or bare type name, invalid!",
     "PPY-TYPE-006": "[PPY-TYPE-006] standalone is requires a boolean expression, you gave me {actual_type}",
+    "PPY-MATH-001": "[PPY-MATH-001] Division by 0 is undefined. Cannot evaluate: {left} / {right}",
+    "PPY-MATH-002": "[PPY-MATH-002] Invalid math result for operator '{op}'. Result was not a real finite number: {value}",
     "PPY-INPUT-001": "[PPY-INPUT-001] ask(..., int) expected an integer value, but got something else: {input}",
     "PPY-INPUT-002": "[PPY-INPUT-002] ask(..., float) expected a decimal value, not an integer or other type. You gave me: {input}",
     "PPY-INPUT-003": "[PPY-INPUT-003] ask(..., bool) expected true/false boolean input, didn't get that: {input}",

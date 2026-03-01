@@ -1,5 +1,6 @@
 # interpreter.py
 import subprocess
+import math
 
 from ppy_errors import make_error
 from runtime import Environment, truthy, ensure_number
@@ -11,6 +12,13 @@ class _LoopStopSignal(Exception):
 
 class _LoopRestartSignal(Exception):
     pass
+
+
+def _ensure_finite_number(value, op: str):
+    if isinstance(value, (int, float)):
+        if not math.isfinite(float(value)):
+            raise make_error("PPY-MATH-002", op=op, value=value)
+    return value
 
 
 def interpret(ast: dict):
@@ -168,7 +176,7 @@ def eval_expr(expr: dict, env: Environment):
     if t == "neg":
         v = eval_expr(expr["value"], env)
         ensure_number(v, "-")
-        return -v
+        return _ensure_finite_number(-v, "-")
 
     if t in {"add", "sub", "mul", "div", "eq", "ne", "gt", "lt", "ge", "le", "and", "or"}:
         left = eval_expr(expr["left"], env)
@@ -178,13 +186,15 @@ def eval_expr(expr: dict, env: Environment):
             return left + right
         if t == "sub":
             ensure_number(left, "-"); ensure_number(right, "-")
-            return left - right
+            return _ensure_finite_number(left - right, "-")
         if t == "mul":
             ensure_number(left, "*"); ensure_number(right, "*")
-            return left * right
+            return _ensure_finite_number(left * right, "*")
         if t == "div":
             ensure_number(left, "/"); ensure_number(right, "/")
-            return left / right
+            if right == 0:
+                raise make_error("PPY-MATH-001", left=left, right=right)
+            return _ensure_finite_number(left / right, "/")
         if t == "eq":
             return left == right
         if t == "ne":
