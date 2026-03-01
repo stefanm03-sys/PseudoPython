@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PseudoPy Guides</title>
+    <style>
+        :root {
+            --bg: #0b1418;
+            --panel: #12212a;
+            --border: #2a4855;
+            --text: #edf5f8;
+            --muted: #95acb6;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            background: linear-gradient(160deg, #0b1418, #112229);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .wrap {
+            max-width: 920px;
+            margin: 0 auto;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        h1 {
+            margin: 0 0 6px;
+        }
+
+        .muted {
+            color: var(--muted);
+            margin: 0 0 14px;
+        }
+
+        .guide-section {
+            border: 1px solid #2a4450;
+            border-radius: 10px;
+            background: #0a141bcc;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .guide-section h2 {
+            margin: 0 0 6px;
+            font-size: 1rem;
+        }
+
+        .guide-subsection {
+            margin: 8px 0 0 0;
+            padding: 8px 10px;
+            border-left: 3px solid #2f5663;
+            background: #0b1720;
+            border-radius: 6px;
+        }
+
+        .guide-subsection p {
+            margin: 6px 0 0 0;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="wrap">
+        <h1>PseudoPy Guides</h1>
+        <p class="muted">Contains info for PseudoPy!</p>
+
+        <section class="guide-section">
+            <h2>1.0 - The Basics</h2>
+            <div class="guide-subsection">
+                <strong>1.1 - Comments</strong>
+                <p class="muted">
+                    Comments write out your thoughts and are ignored by the program. You can write them on one line, or
+                    span across numerous!
+
+                    Single line comments start with a hashtag <code>#</code> or <code>//</code> and continue until the
+                    end of the line. Like here:
+                <pre><code>
+                    # This is a single line comment in Pseudopy!
+                    // This is also a single line comment in Pseudopy!
+                </code></pre>
+
+                Multi line comments start with <code>/*</code> and <code>//</code>. <code>/*</code> comments end with
+                <code>*/</code>, and <code>//</code> comments end with <code>//</code> on a new line. So you can do
+                this:
+                <pre><code>                    
+                    /*
+                    This is a multi line comment in Pseudopy!
+                    */
+
+                    // This is also a multi line comment in Pseudopy!
+                    // It just ends when you put another set of double slashes on a new line!
+                </p>
+            </div>
+            <div class="guide-subsection">
+                <strong>1.2 - Data Types</strong>
+                <p class="muted">
+                    Data types are unique, but consistent in all languages. The four generally known are <em>strings</em>, <em>integers</em>, <em>floats</em>, and <em>booleans</em>. these!
+
+                    <code>
+                    "This is a string!" # A string is a sequence of characters, and is marked by being wrapped in double quotes (but not limited to in certain languages).
+
+                    3 # An integer is any whole number, and can be positive or negative. 0 is also an integer (If that wasn't obvious).
+
+                    3.14 # A float is any number with a decimal point, and can also be positive or negative. 0 itself is also a float, and can be written as 0.0.
+
+                    true # A boolean is a value that can only be either true or false. It is used for logic and decision in programming, and can be seen commonly in conditions and loops.
+
+                    </code>
+                </p>
+            </div>
+            <div class="guide-subsection">
+                <strong>1.3 - Syntax</strong>
+                <p class="muted">
+                    PseudoPy has dynamic code, and easy readability. It can be complicated, but not impossible. Information on code is explained here in the following sentences. 
+                    <code>
+                        # This is a comment, and is ignored by the program.
+
+                        do 1 (+, -, *, /, ==) 1 # This is a mathematical operation, and can be done with the do operator. You can use addition, subtraction, multiplication, division, and equality. You can also use parentheses to specify order of operations.
+
+                        var x is 1 # Horizontally declares variables.
+                        
+                        var y is
+                            2 # Vertically declares variables.
+                        
+                        repeat amt(2) # Loop using indents.
+                            state("Hello!") # Repeats the code block 2 times in an indentation.
+                        endpt # Closes the code block, and is required for loops and functions.
+                        
+                        repeat when x == 10 do { # Loop using braces/brackets.
+                            state(x) # Repeats the code block while the condition is true.
+                        }
+                        
+                        do 1 + 1 # do: Calls processes in your program. Calls functions, variables, and mathematical operations.
+
+                        is 1 + 1 == 2 # is: Logical and assignment operator. In assignments, it states that this IS that. In logic, it checks if this IS true/false, and returns it.
+
+                        when 1 > 0 or 2 > 0 do # or: Logical operator that checks if either condition is true. In this case, it would return true, since both conditions are true. It would run like usual, but only if either condition is true.
+
+                        do 1 + 1 and 2 + 2 # and: Operator to check two values. Here, it would do both operations and return both on separate lines.
+
+                    </code>
+                </p>
+            </div>
+            <div class="guide-subsection">
+                <strong>1.4 - Variables and Assignment</strong>
+                <p class="muted">
+                    <em>Variables</em> in Pseudopy are created using the <code>var</code> and <code>is</code> operators.
+                    <code>var</code> is used to declare a shiny new variable, and <code>is</code> can used to assign a
+                    value to any variable.
+                    To start making your brand new, original variable, use <code>var</code> followed by the variable
+                    name, then <code>is</code>, and finally the value you want to assign to it. This assigns data to the
+                    variable, and you can use it later in your code by referencing the variable name. For example:
+                <pre><code>
+                    var x is 10 # This declares a variable x with `10` assigned to it.
+                    var name is "Alice" # This declares a variable name with "Alice" assigned to it.
+                    var sum is 5 + x # This declares a variable sum with the value of 5 + x, which is 15, assigned to it.
+                    state(sum) # This prints the variable sum, which outputs 15, since x is 10 and is being added with 5.
+                
+                </code></pre>
+
+                Functions are also creatable! You define a function using <code>function</code>, followed by the name.
+                You can do <code>function myFunc</code> or <code>function myFunc(parameters)</code> if you want to
+                specify parameters. Functions do not use <code>is</code> for creation, and instead just require you to
+                Enter, in which you can write the function body. For example:
+                <pre><code>
+                    function greet(user) # Creates a function called greet with a parameter called user
+                        state("Hello there!") # Contents of the function
+                    endpt # Closes the function body
+                    </code></pre>
+                </p>
+            </div>
+        </section>
+
+    </main>
+</body>
+
+</html>

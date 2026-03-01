@@ -504,6 +504,7 @@
                 <div class="sidebar-title">Workspace</div>
                 <button id="navCoding" class="nav-btn active" type="button">Coding</button>
                 <button id="navDocs" class="nav-btn" type="button">Docs</button>
+                <button id="navGuides" class="nav-btn" type="button">Guides</button>
                 <button id="navPatchNotes" class="nav-btn" type="button">Patch Notes</button>
             </aside>
 
@@ -548,6 +549,19 @@
                     <div id="docsUrlLabel" class="docs-url"></div>
                     <iframe id="docsFrame" class="docs-frame" title="PseudoPy documentation" loading="lazy"></iframe>
                     <p class="muted">If embedded docs are blocked by the site, use "Open in new tab".</p>
+                </article>
+            </section>
+
+            <section id="guidesView" class="docs-view view hidden">
+                <article class="docs-card">
+                    <div class="docs-head">
+                        <h2>Guides</h2>
+                        <a id="guidesExternalLink" class="docs-link" href="#" target="_blank"
+                            rel="noopener noreferrer">Open in new tab</a>
+                    </div>
+                    <p class="muted">Guides page loaded below.</p>
+                    <div id="guidesUrlLabel" class="docs-url"></div>
+                    <iframe id="guidesFrame" class="docs-frame" title="PseudoPy guides" loading="lazy"></iframe>
                 </article>
             </section>
 
@@ -602,6 +616,7 @@ endpt
 do x + 1
 stateBool(true)`;
         const DOCS_LINK = "./pseudopydoc.pdf";
+        const GUIDES_LINK = "./guides.html";
         const PATCH_NOTES_LINK = "./patch-notes/latest.html";
 
         function pickInitialCode() {
@@ -625,13 +640,18 @@ stateBool(true)`;
         const uploadInput = document.getElementById("uploadInput");
         const navCoding = document.getElementById("navCoding");
         const navDocs = document.getElementById("navDocs");
+        const navGuides = document.getElementById("navGuides");
         const navPatchNotes = document.getElementById("navPatchNotes");
         const codingView = document.getElementById("codingView");
         const docsView = document.getElementById("docsView");
+        const guidesView = document.getElementById("guidesView");
         const patchNotesView = document.getElementById("patchNotesView");
         const docsFrame = document.getElementById("docsFrame");
         const docsUrlLabel = document.getElementById("docsUrlLabel");
         const docsExternalLink = document.getElementById("docsExternalLink");
+        const guidesFrame = document.getElementById("guidesFrame");
+        const guidesUrlLabel = document.getElementById("guidesUrlLabel");
+        const guidesExternalLink = document.getElementById("guidesExternalLink");
         const patchFrame = document.getElementById("patchFrame");
         const patchUrlLabel = document.getElementById("patchUrlLabel");
         const patchExternalLink = document.getElementById("patchExternalLink");
@@ -676,15 +696,21 @@ stateBool(true)`;
         function activateView(viewName) {
             const codingActive = viewName === "coding";
             const docsActive = viewName === "docs";
+            const guidesActive = viewName === "guides";
             const patchActive = viewName === "patch";
             codingView.classList.toggle("hidden", !codingActive);
             docsView.classList.toggle("hidden", !docsActive);
+            guidesView.classList.toggle("hidden", !guidesActive);
             patchNotesView.classList.toggle("hidden", !patchActive);
             navCoding.classList.toggle("active", codingActive);
             navDocs.classList.toggle("active", docsActive);
+            navGuides.classList.toggle("active", guidesActive);
             navPatchNotes.classList.toggle("active", patchActive);
             if (docsActive && !docsFrame.src) {
                 docsFrame.src = DOCS_LINK;
+            }
+            if (guidesActive && !guidesFrame.src) {
+                guidesFrame.src = GUIDES_LINK;
             }
             if (patchActive && !patchFrame.src) {
                 patchFrame.src = PATCH_NOTES_LINK;
@@ -918,6 +944,7 @@ result_json
         });
         navCoding.addEventListener("click", () => activateView("coding"));
         navDocs.addEventListener("click", () => activateView("docs"));
+        navGuides.addEventListener("click", () => activateView("guides"));
         navPatchNotes.addEventListener("click", () => activateView("patch"));
 
         codeInput.addEventListener("keydown", (event) => {
@@ -1004,6 +1031,8 @@ result_json
             exampleCode.textContent = EXAMPLE_SNIPPET;
             docsUrlLabel.textContent = DOCS_LINK;
             docsExternalLink.href = DOCS_LINK;
+            guidesUrlLabel.textContent = GUIDES_LINK;
+            guidesExternalLink.href = GUIDES_LINK;
             patchUrlLabel.textContent = PATCH_NOTES_LINK;
             patchExternalLink.href = PATCH_NOTES_LINK;
             try {
