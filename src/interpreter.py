@@ -2,6 +2,7 @@
 import subprocess
 import math
 import time
+from dataclasses import dataclass
 
 from ppy_errors import make_error
 from runtime import Environment, truthy, ensure_number
@@ -18,11 +19,41 @@ class _LoopRestartSignal(Exception):
 MAX_LOOP_ITERATIONS = 100000
 
 
+@dataclass
+class _UserFunction:
+    name: str
+    params: list
+    body: list
+    closure: Environment
+
+
 def _ensure_finite_number(value, op: str):
     if isinstance(value, (int, float)):
         if not math.isfinite(float(value)):
             raise make_error("PPY-MATH-002", op=op, value=value)
     return value
+
+
+def _invoke_function(name: str, arg_exprs: list, env: Environment, loop_depth: int):
+    func_value = env.get(name)
+    if not isinstance(func_value, _UserFunction):
+        raise make_error("PPY-FUNC-002", name=name)
+
+    args = [eval_expr(arg, env) for arg in arg_exprs]
+    if len(args) != len(func_value.params):
+        raise make_error(
+            "PPY-FUNC-003",
+            name=func_value.name,
+            expected=len(func_value.params),
+            actual=len(args),
+        )
+
+    local_env = Environment(parent=func_value.closure)
+    for param_name, arg_value in zip(func_value.params, args):
+        local_env.define(param_name, arg_value)
+
+    for s in func_value.body:
+        execute_stmt(s, local_env, loop_depth=loop_depth)
 
 
 def interpret(ast: dict):
@@ -59,6 +90,16 @@ def execute_stmt(stmt: dict, env: Environment, loop_depth: int = 0):
     elif t == "wait":
         delay_seconds = eval_wait_delay(stmt["value"], env)
         time.sleep(delay_seconds)
+    elif t == "function_def":
+        func = _UserFunction(
+            name=stmt["name"],
+            params=list(stmt.get("params", [])),
+            body=list(stmt.get("body", [])),
+            closure=env,
+        )
+        env.define(stmt["name"], func)
+    elif t == "call_stmt":
+        _invoke_function(stmt["name"], stmt.get("args", []), env, loop_depth)
     elif t == "stop":
         if loop_depth <= 0:
             raise make_error("PPY-RUNTIME-006")

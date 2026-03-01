@@ -28,6 +28,8 @@ ERROR_TEMPLATES = {
     "PPY-INPUT-003": "[PPY-INPUT-003] ask(..., bool) expected true/false boolean input, didn't get that: {input}",
     "PPY-INPUT-004": "[PPY-INPUT-004] Unknown ask data type '{data_type}'. Use text, int, float, or bool.",
     "PPY-EXEC-001": "[PPY-EXEC-001] execute(...) command failed, try again or change code. (exit {return_code}): {command}",
+    "PPY-FUNC-002": "[PPY-FUNC-002] {name}(...) is not a function and cannot be called.",
+    "PPY-FUNC-003": "[PPY-FUNC-003] Function '{name}' expected {expected} argument(s), got {actual}.",
     "PPY-INTERNAL-001": "[PPY-INTERNAL-001] Internal error: {detail}",
 }
 

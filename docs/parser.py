@@ -14,6 +14,8 @@ program: statement*
           | print_stmt
           | is_stmt
           | do_stmt
+          | function_stmt
+          | call_stmt
           | wait_stmt
           | execute_stmt
           | stop_stmt
@@ -27,6 +29,11 @@ assign_stmt: NAME "is" expr         -> assign_stmt
 print_stmt: ("state" | "stateStr" | "stateInt" | "stateFloat" | "stateBool") "(" expr ")" -> print_stmt
 is_stmt: "is" expr                   -> is_stmt
 do_stmt: "do" expr                  -> print_stmt
+function_stmt: "function" NAME "(" param_list_opt ")" program "endpt" -> function_stmt
+             | "function" NAME "(" param_list_opt ")" "{" program "}" -> function_stmt
+             | "function" NAME program "endpt"                        -> function_stmt_noparams
+             | "function" NAME "{" program "}"                        -> function_stmt_noparams
+call_stmt: NAME "(" arg_list_opt ")" -> call_stmt
 wait_stmt: "wait" "(" wait_arg ")"  -> wait_stmt
 execute_stmt: "execute" "(" expr ")"      -> execute_stmt
 stop_stmt: "stop"                         -> stop_stmt
@@ -91,6 +98,10 @@ repeat_amt_stmt: "repeat" "amt" "(" expr ")" program "endpt"         -> repeat_a
      | "(" expr ")"
 
 ask_expr: "ask" "(" expr ("," expr)? ")" -> ask_expr
+param_list_opt: param_list |              -> empty_params
+arg_list_opt: arg_list |                  -> empty_args
+param_list: NAME ("," NAME)*
+arg_list: expr ("," expr)*
 
 NAME: /[a-zA-Z_][a-zA-Z0-9_]*/
 DURATION: /\d+(\.\d+)?(ms|s|m)/
@@ -125,6 +136,23 @@ class ASTBuilder(Transformer):
     def wait_stmt(self, value):
         return {"type": "wait", "value": value}
 
+    def empty_params(self):
+        return []
+
+    def empty_args(self):
+        return []
+
+    def param_list(self, *names):
+        return [str(n) for n in names]
+
+    def arg_list(self, *args):
+        return list(args)
+
+    def param_list_opt(self, values):
+        return values
+
+    def arg_list_opt(self, values):
+        return values
 
     def program(self, *stmts):
         return {"type": "program", "statements": list(stmts)}
@@ -140,6 +168,25 @@ class ASTBuilder(Transformer):
 
     def is_stmt(self, expr):
         return {"type": "is", "value": expr}
+
+    def function_stmt(self, name, params, block):
+        return {
+            "type": "function_def",
+            "name": str(name),
+            "params": params,
+            "body": block["statements"],
+        }
+
+    def function_stmt_noparams(self, name, block):
+        return {
+            "type": "function_def",
+            "name": str(name),
+            "params": [],
+            "body": block["statements"],
+        }
+
+    def call_stmt(self, name, args):
+        return {"type": "call_stmt", "name": str(name), "args": args}
 
     def if_stmt(self, cond, then_block, *rest):
         elifs = []

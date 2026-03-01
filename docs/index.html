@@ -584,7 +584,7 @@
     <script>
         CodeMirror.defineSimpleMode("pseudopy", {
             start: [
-                { regex: /(?:var|is|when|butIf|else|do|repeat|amt|endpt|stop|restart|ask|execute|wait)\b/, token: "keyword" },
+                { regex: /(?:var|is|when|butIf|else|do|repeat|amt|endpt|stop|restart|ask|execute|wait|function)\b/, token: "keyword" },
                 { regex: /(?:state|stateStr|stateInt|stateFloat|stateBool)\b/, token: "def" },
                 { regex: /(?:true|false|none|ignore|TRUE|FALSE)\b/, token: "atom" },
                 { regex: /(?:and|or)\b/, token: "keyword" },
@@ -613,7 +613,7 @@ when x > 1, do
 endpt
 do x + 1
 stateBool(true)`;
-        const DOCS_LINK = "./pseudopydoc.pdf";
+        const DOCS_LINK = "./pseudopydocs.pdf";
         const GUIDES_LINK = "./guides.html?v=0.1.2";
         const PATCH_NOTES_LINK = "./patch-notes/latest.html";
 
@@ -799,6 +799,7 @@ if "/home/pyodide" not in sys.path:
             if (/^else\b$/i.test(trimmed)) return true;
             if (/^repeat\s+when\b.*\bdo$/i.test(trimmed)) return true;
             if (/^repeat\s+amt\s*\(.*\)\s*$/i.test(trimmed)) return true;
+            if (/^function\b/i.test(trimmed) && !/\{\s*$/.test(trimmed)) return true;
             return false;
         }
 
