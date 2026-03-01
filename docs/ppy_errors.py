@@ -24,9 +24,9 @@ ERROR_TEMPLATES = {
     "PPY-INPUT-001": "[PPY-INPUT-001] ask(..., int) expected an integer value, but got something else: {input}",
     "PPY-INPUT-002": "[PPY-INPUT-002] ask(..., float) expected a decimal value, not an integer or other type. You gave me: {input}",
     "PPY-INPUT-003": "[PPY-INPUT-003] ask(..., bool) expected true/false boolean input, didn't get that: {input}",
-    "PPY-INPUT-004": "[PPY-INPUT-004] Unknown ask data type '{data_type}'. Use text, int, float, or bool.",
+    "PPY-INPUT-004": "[PPY-INPUT-004] Unknown ask data type '{data_type}'. Use text, integer, float, or boolean (true, false).",
     "PPY-EXEC-001": "[PPY-EXEC-001] execute(...) command failed, try again or change code. (exit {return_code}): {command}",
-    "PPY-INTERNAL-001": "[PPY-INTERNAL-001] Internal error: {detail}",
+    "PPY-INTERNAL-001": "[PPY-INTERNAL-001] Internal error! Info: {detail}",
 }
 
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +13,11 @@
             --text: #edf5f8;
             --muted: #95acb6;
         }
-        * { box-sizing: border-box; }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             font-family: "Trebuchet MS", "Segoe UI", sans-serif;
@@ -21,6 +26,7 @@
             min-height: 100vh;
             padding: 20px;
         }
+
         .wrap {
             max-width: 860px;
             margin: 0 auto;
@@ -29,15 +35,39 @@
             border-radius: 12px;
             padding: 18px;
         }
-        h1 { margin: 0 0 6px; }
-        .muted { color: var(--muted); margin: 0 0 14px; }
-        h2 { margin-top: 20px; }
-        ul { margin: 8px 0 0 20px; }
-        li { margin-bottom: 6px; }
-        a { color: #9cd4ff; text-decoration: none; }
-        a:hover { text-decoration: underline; }
+
+        h1 {
+            margin: 0 0 6px;
+        }
+
+        .muted {
+            color: var(--muted);
+            margin: 0 0 14px;
+        }
+
+        h2 {
+            margin-top: 20px;
+        }
+
+        ul {
+            margin: 8px 0 0 20px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        a {
+            color: #9cd4ff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
+
 <body>
     <main class="wrap">
         <h1>PseudoPy v0.1.0</h1>
@@ -45,21 +75,23 @@
 
         <h2>Added</h2>
         <ul>
-            <li>Web executor UI with runtime output and error panels.</li>
-            <li>Upload and save support for <code>.ppy</code> files.</li>
-            <li>Docs tab with embedded documentation page.</li>
-            <li>Smart editor tab/shift-tab indentation support.</li>
-            <li>Parser support for <code>do</code>, <code>stateStr/stateInt/stateFloat/stateBool</code>, lowercase booleans, and flexible <code>when</code> syntax.</li>
+            <li>More operators</li>
+            <li>File saves and uploads for <code>.ppy</code> files</li>
+            <li>Docs tab with PDF</li>
+            <li>Auto Indentation</li>
+            <li>Parser and execution support for <code>do</code>, <code>stateStr/stateInt/stateFloat/stateBool</code>,
+                lowercase booleans, and flexible <code>when</code> </li>
             <li>Loop controls: <code>stop</code> and <code>restart</code>.</li>
         </ul>
 
         <h2>Fixed</h2>
         <ul>
-            <li>Website runtime handling for parser/runtime errors.</li>
-            <li>Mirror workflow for keeping <code>src</code> and <code>docs</code> in sync.</li>
+            <li>Errors not being displayed properly in the UI</li>
+            <li>File mirroring for <code>src</code> and <code>docs</code> to sync</li>
         </ul>
 
         <p><a href="./latest.html">Back to Patch Notes</a> | <a href="../index.html">Back to Executor</a></p>
     </main>
 </body>
+
 </html>

@@ -10,6 +10,10 @@ Modes:
 - src-to-docs (default): one-way copy from src into docs
 - docs-to-src: one-way copy from docs into src
 - bidirectional: newer file wins in either direction
+
+cd C:\Users\stefa\pseudopy.v0
+py -3.12 mirror.py
+
 """
 
 import argparse

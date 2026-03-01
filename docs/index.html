@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Pages redeploy trigger -->
     <title>PseudoPy Online Executor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/theme/material-darker.min.css">
     <style>
         :root {
             --bg-0: #0b1418;
@@ -156,6 +158,23 @@
         }
 
         textarea:focus {
+            outline: 2px solid #18c29c66;
+            border-color: #36c9a8;
+        }
+
+        .CodeMirror {
+            width: 100%;
+            flex: 1;
+            min-height: 220px;
+            border: 1px solid #325361;
+            border-radius: 10px;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 0.93rem;
+            line-height: 1.5;
+            background: #0a1218;
+        }
+
+        .CodeMirror-focused {
             outline: 2px solid #18c29c66;
             border-color: #36c9a8;
         }
@@ -459,8 +478,25 @@
         </div>
     </main>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/mode/simple.min.js"></script>
     <script async src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
     <script>
+        CodeMirror.defineSimpleMode("pseudopy", {
+            start: [
+                { regex: /(?:var|is|when|butIf|else|do|repeat|amt|endpt|stop|restart|ask|execute)\b/, token: "keyword" },
+                { regex: /(?:state|stateStr|stateInt|stateFloat|stateBool)\b/, token: "def" },
+                { regex: /(?:true|false|none|ignore|TRUE|FALSE)\b/, token: "atom" },
+                { regex: /(?:and|or)\b/, token: "keyword" },
+                { regex: /"(?:[^"\\]|\\.)*"/, token: "string" },
+                { regex: /-?\d+(?:\.\d+)?/, token: "number" },
+                { regex: /#[^\n]*/, token: "comment" },
+                { regex: /\/\/[^\n]*/, token: "comment" },
+                { regex: /(?:==|!=|>=|<=|>|<|\+|-|\*|\/)/, token: "operator" },
+                { regex: /[a-zA-Z_][a-zA-Z0-9_]*/, token: "variable" }
+            ]
+        });
+
         const RUNTIME_FILES = [
             "lexer.py",
             "parser.py",
@@ -486,6 +522,7 @@ stateBool(true)`;
 
         let pyodide = null;
         let runtimeReady = false;
+        let codeEditor = null;
 
         const runtimeStatus = document.getElementById("runtimeStatus");
         const codeInput = document.getElementById("codeInput");
@@ -505,6 +542,37 @@ stateBool(true)`;
         const docsUrlLabel = document.getElementById("docsUrlLabel");
         const docsExternalLink = document.getElementById("docsExternalLink");
         const exampleCode = document.getElementById("exampleCode");
+
+        function initializeCodeEditor() {
+            if (!window.CodeMirror || codeEditor) {
+                return;
+            }
+            codeEditor = CodeMirror.fromTextArea(codeInput, {
+                mode: "pseudopy",
+                theme: "material-darker",
+                lineNumbers: true,
+                indentUnit: 4,
+                tabSize: 4,
+                indentWithTabs: false,
+                lineWrapping: true,
+                extraKeys: {
+                    "Ctrl-Enter": () => runCode()
+                }
+            });
+        }
+
+        function getSourceCode() {
+            return codeEditor ? codeEditor.getValue() : String(codeInput.value ?? "");
+        }
+
+        function setSourceCode(value) {
+            const text = String(value ?? "");
+            if (codeEditor) {
+                codeEditor.setValue(text);
+            } else {
+                codeInput.value = text;
+            }
+        }
 
         function setStatus(message, className = "") {
             runtimeStatus.textContent = message;
@@ -614,7 +682,7 @@ if "/home/pyodide" not in sys.path:
         }
 
         async function runCode() {
-            const sourceCode = String(codeInput.value ?? "").replace(/\s+$/, "");
+            const sourceCode = getSourceCode().replace(/\s+$/, "");
             if (!/\S/.test(sourceCode)) {
                 renderResult({ output: "", error: "Please enter PseudoPy code first!" });
                 return;
@@ -676,7 +744,7 @@ result_json
         }
 
         function clearAll() {
-            codeInput.value = "";
+            setSourceCode("");
             executedCodeBox.textContent = "(nothing executed yet)";
             executedCodeBox.className = "output-box";
             outputBox.textContent = "(no output yet)";
@@ -686,7 +754,7 @@ result_json
         }
 
         function downloadPpyFile() {
-            const sourceCode = String(codeInput.value ?? "");
+            const sourceCode = getSourceCode();
             if (!/\S/.test(sourceCode)) {
                 renderResult({ output: "", error: "No code to save! Write PseudoPy code first." });
                 return;
@@ -712,7 +780,7 @@ result_json
                 return;
             }
             const content = await file.text();
-            codeInput.value = content.replace(/\r\n/g, "\n");
+            setSourceCode(content.replace(/\r\n/g, "\n"));
             activateView("coding");
             setStatus(`Loaded ${name || ".ppy file"}`, "ok");
         }
@@ -813,7 +881,8 @@ result_json
         });
 
         window.addEventListener("load", async () => {
-            codeInput.value = pickInitialCode();
+            initializeCodeEditor();
+            setSourceCode(pickInitialCode());
             exampleCode.textContent = EXAMPLE_SNIPPET;
             docsUrlLabel.textContent = DOCS_LINK;
             docsExternalLink.href = DOCS_LINK;
