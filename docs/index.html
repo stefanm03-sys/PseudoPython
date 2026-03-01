@@ -72,6 +72,13 @@
             font-size: 0.97rem;
         }
 
+        .version-head {
+            margin-top: 6px;
+            color: #c9e4ef;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
         .status {
             display: inline-flex;
             align-items: center;
@@ -390,6 +397,7 @@
                 <h1>PseudoPy Web Executor</h1>
                 <div id="runtimeStatus" class="status">Initializing runtime...</div>
             </div>
+            <div class="version-head">PseudoPy - v0</div>
             <p class="sub">Run .ppy code directly in-browser with parser/runtime errors from PseudoPy.</p>
         </header>
 
@@ -459,12 +467,9 @@ endpt</div>
             "ppy_errors.py"
         ];
 
-        const EXAMPLE_CODE = `var x is 2
-state(x)
-when x > 1 do
-    state("x is greater than 1")
-endpt`;
-        const DOCS_LINK = "https://docs.google.com/document/d/1-adb9pa95Z382h-DFUuLVZvLo7gkTVxjXgzQd2BkNUk/edit?usp=sharing";
+        const HELLO_WORLD_CODE = `state("Hello World")`;
+        const HELLO_PSEUDOPY_CODE = `state("Hello PsuedoPy")`;
+        const DOCS_LINK = "./pseudopydoc.pdf";
 
         let pyodide = null;
         let runtimeReady = false;
@@ -794,7 +799,7 @@ result_json
         });
 
         window.addEventListener("load", async () => {
-            codeInput.value = EXAMPLE_CODE;
+            codeInput.value = pickInitialCode();
             docsUrlLabel.textContent = DOCS_LINK;
             docsExternalLink.href = DOCS_LINK;
             try {
@@ -822,3 +827,7 @@ result_json
     </script>
 </body>
 </html>
+        function pickInitialCode() {
+            // 1 in 4 chance to show the alternate welcome snippet.
+            return Math.random() < 0.25 ? HELLO_PSEUDOPY_CODE : HELLO_WORLD_CODE;
+        }

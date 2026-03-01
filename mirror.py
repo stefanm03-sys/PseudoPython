@@ -1,19 +1,31 @@
-"""Mirror source files into docs and stage them for commit.
+"""Sync .py files between src and docs, then stage both directories.
 
-Run this from the repository root whenever you edit code in ``src/`` and want
-those changes reflected in the GitHub Pages copy under ``docs/``.  The script
-copies every ``.py`` file from ``src/`` into ``docs/`` (overwriting), then
-runs ``git add docs`` so the updated files are staged.
+This keeps runtime files aligned for local execution (src/) and GitHub Pages
+execution (docs/). For each top-level ``.py`` file in either directory:
+1) If a file exists only on one side, it is copied to the other side.
+2) If both exist but differ, the newer file (mtime) overwrites the older one.
+3) If both are identical, no action is taken.
 
-It does **not** commit for you so you can review or add a custom message.
+Modes:
+- src-to-docs (default): one-way copy from src into docs
+- docs-to-src: one-way copy from docs into src
+- bidirectional: newer file wins in either direction
 """
 
+import argparse
+import filecmp
 from pathlib import Path
 import shutil
 import subprocess
 import sys
 
-def mirror_sources():
+
+def _copy(src_path: Path, dst_path: Path, note: str) -> None:
+    shutil.copy2(src_path, dst_path)
+    print(f"  {src_path.parent.name} -> {dst_path.parent.name}  {src_path.name} ({note})")
+
+
+def sync_python_files(mode: str = "src-to-docs") -> int:
     root = Path(__file__).parent
     src = root / "src"
     docs = root / "docs"
@@ -25,20 +37,80 @@ def mirror_sources():
         print("docs directory not found", file=sys.stderr)
         sys.exit(1)
 
-    print(f"Mirroring *.py from {src} to {docs}...")
-    for path in src.iterdir():
-        if path.suffix == ".py":
-            dest = docs / path.name
-            shutil.copy2(path, dest)
-            print(f"  copied {path.name}")
+    src_files = {p.name: p for p in src.iterdir() if p.is_file() and p.suffix == ".py"}
+    docs_files = {p.name: p for p in docs.iterdir() if p.is_file() and p.suffix == ".py"}
+    all_names = sorted(set(src_files) | set(docs_files))
 
-    # stage changes with git
+    print(f"Syncing top-level .py files between {src} and {docs} (mode: {mode})...")
+    changes = 0
+
+    for name in all_names:
+        src_path = src_files.get(name)
+        docs_path = docs_files.get(name)
+
+        if mode == "src-to-docs":
+            if src_path and not docs_path:
+                _copy(src_path, docs / name, "created in docs")
+                changes += 1
+            elif src_path and docs_path and not filecmp.cmp(src_path, docs_path, shallow=False):
+                _copy(src_path, docs_path, "updated from src")
+                changes += 1
+            continue
+
+        if mode == "docs-to-src":
+            if docs_path and not src_path:
+                _copy(docs_path, src / name, "created in src")
+                changes += 1
+            elif src_path and docs_path and not filecmp.cmp(src_path, docs_path, shallow=False):
+                _copy(docs_path, src_path, "updated from docs")
+                changes += 1
+            continue
+
+        # bidirectional mode
+        if src_path and not docs_path:
+            _copy(src_path, docs / name, "created in docs")
+            changes += 1
+            continue
+
+        if docs_path and not src_path:
+            _copy(docs_path, src / name, "created in src")
+            changes += 1
+            continue
+
+        if src_path is None or docs_path is None:
+            continue
+
+        if filecmp.cmp(src_path, docs_path, shallow=False):
+            continue
+
+        src_mtime = src_path.stat().st_mtime
+        docs_mtime = docs_path.stat().st_mtime
+        if src_mtime >= docs_mtime:
+            _copy(src_path, docs_path, "newer in src")
+        else:
+            _copy(docs_path, src_path, "newer in docs")
+        changes += 1
+
+    if changes == 0:
+        print("No .py sync changes needed.")
+
     try:
-        subprocess.run(["git", "add", "docs"], check=True, cwd=str(root))
-        print("Staged docs directory for commit.")
+        subprocess.run(["git", "add", "src", "docs"], check=True, cwd=str(root))
+        print("Staged src and docs for commit.")
     except subprocess.CalledProcessError as exc:
         print("Failed to run git add:", exc, file=sys.stderr)
         sys.exit(1)
 
+    return changes
+
+
 if __name__ == "__main__":
-    mirror_sources()
+    parser = argparse.ArgumentParser(description="Sync top-level .py files between src and docs.")
+    parser.add_argument(
+        "--mode",
+        choices=["src-to-docs", "docs-to-src", "bidirectional"],
+        default="src-to-docs",
+        help="sync direction/mode (default: src-to-docs)",
+    )
+    args = parser.parse_args()
+    sync_python_files(mode=args.mode)
