@@ -25,6 +25,25 @@ def _copy(src_path: Path, dst_path: Path, note: str) -> None:
     print(f"  {src_path.parent.name} -> {dst_path.parent.name}  {src_path.name} ({note})")
 
 
+def stage_docs_assets(root: Path) -> None:
+    docs = root / "docs"
+    asset_candidates = []
+    fixed_files = ["index.html", ".nojekyll"]
+    for name in fixed_files:
+        p = docs / name
+        if p.exists():
+            asset_candidates.append(str(p.relative_to(root)))
+    for pdf in sorted(docs.glob("*.pdf")):
+        asset_candidates.append(str(pdf.relative_to(root)))
+
+    if not asset_candidates:
+        print("No docs assets found to stage.")
+        return
+
+    subprocess.run(["git", "add", *asset_candidates], check=True, cwd=str(root))
+    print("Staged docs assets:", ", ".join(asset_candidates))
+
+
 def sync_python_files(mode: str = "src-to-docs") -> int:
     root = Path(__file__).parent
     src = root / "src"
@@ -96,6 +115,7 @@ def sync_python_files(mode: str = "src-to-docs") -> int:
 
     try:
         subprocess.run(["git", "add", "src", "docs"], check=True, cwd=str(root))
+        stage_docs_assets(root)
         print("Staged src and docs for commit.")
     except subprocess.CalledProcessError as exc:
         print("Failed to run git add:", exc, file=sys.stderr)
