@@ -383,6 +383,35 @@ if "/home/pyodide" not in sys.path:
             }
         }
 
+        function getLineStart(text, index) {
+            return text.lastIndexOf("\n", Math.max(0, index - 1)) + 1;
+        }
+
+        function getLineEnd(text, index) {
+            const end = text.indexOf("\n", index);
+            return end === -1 ? text.length : end;
+        }
+
+        function countIndent(line) {
+            const match = line.match(/^[ ]*/);
+            return match ? match[0].length : 0;
+        }
+
+        function shouldIndentAfter(line) {
+            const trimmed = line.trim();
+            if (!trimmed) return false;
+            if (/^when\b.*\bdo$/i.test(trimmed)) return true;
+            if (/^butIf\b.*\bdo$/i.test(trimmed)) return true;
+            if (/^else\b$/i.test(trimmed)) return true;
+            if (/^repeat\s+when\b.*\bdo$/i.test(trimmed)) return true;
+            if (/^repeat\s+amt\s*\(.*\)\s*$/i.test(trimmed)) return true;
+            return false;
+        }
+
+        function isEndptLine(line) {
+            return /^endpt\b/i.test(line.trim());
+        }
+
         async function runCode() {
             const sourceCode = String(codeInput.value ?? "").replace(/\s+$/, "");
             if (!/\S/.test(sourceCode)) {
@@ -459,8 +488,80 @@ result_json
         clearBtn.addEventListener("click", clearAll);
 
         codeInput.addEventListener("keydown", (event) => {
+            const tabSize = 4;
+
             if (event.ctrlKey && event.key === "Enter") {
                 runCode();
+                return;
+            }
+
+            if (event.key === "Tab") {
+                event.preventDefault();
+                const start = codeInput.selectionStart;
+                const end = codeInput.selectionEnd;
+                const value = codeInput.value;
+
+                if (event.shiftKey) {
+                    if (start === end) {
+                        const lineStart = getLineStart(value, start);
+                        const line = value.slice(lineStart, getLineEnd(value, start));
+                        const removable = Math.min(tabSize, countIndent(line));
+                        if (removable > 0) {
+                            codeInput.value = value.slice(0, lineStart) + value.slice(lineStart + removable);
+                            const pos = Math.max(lineStart, start - removable);
+                            codeInput.selectionStart = pos;
+                            codeInput.selectionEnd = pos;
+                        }
+                    } else {
+                        const firstLineStart = getLineStart(value, start);
+                        const selectedText = value.slice(firstLineStart, end);
+                        const lines = selectedText.split("\n");
+                        let removedTotal = 0;
+                        const adjusted = lines.map((line) => {
+                            const removable = Math.min(tabSize, countIndent(line));
+                            removedTotal += removable;
+                            return line.slice(removable);
+                        }).join("\n");
+                        codeInput.value = value.slice(0, firstLineStart) + adjusted + value.slice(end);
+                        codeInput.selectionStart = firstLineStart;
+                        codeInput.selectionEnd = end - removedTotal;
+                    }
+                } else {
+                    if (start === end) {
+                        const indent = " ".repeat(tabSize);
+                        codeInput.value = value.slice(0, start) + indent + value.slice(end);
+                        codeInput.selectionStart = start + tabSize;
+                        codeInput.selectionEnd = start + tabSize;
+                    } else {
+                        const firstLineStart = getLineStart(value, start);
+                        const selectedText = value.slice(firstLineStart, end);
+                        const lines = selectedText.split("\n");
+                        const adjusted = lines.map((line) => `    ${line}`).join("\n");
+                        codeInput.value = value.slice(0, firstLineStart) + adjusted + value.slice(end);
+                        codeInput.selectionStart = firstLineStart;
+                        codeInput.selectionEnd = end + (lines.length * tabSize);
+                    }
+                }
+                return;
+            }
+
+            if (event.key === "Enter") {
+                event.preventDefault();
+                const start = codeInput.selectionStart;
+                const end = codeInput.selectionEnd;
+                const value = codeInput.value;
+                const lineStart = getLineStart(value, start);
+                const lineEnd = getLineEnd(value, start);
+                const currentLine = value.slice(lineStart, lineEnd);
+                const baseIndent = countIndent(currentLine);
+                const extraIndent = shouldIndentAfter(currentLine) ? tabSize : 0;
+                const dedent = isEndptLine(currentLine) ? tabSize : 0;
+                const nextIndent = Math.max(0, baseIndent + extraIndent - dedent);
+                const insertion = "\n" + " ".repeat(nextIndent);
+                codeInput.value = value.slice(0, start) + insertion + value.slice(end);
+                const cursor = start + insertion.length;
+                codeInput.selectionStart = cursor;
+                codeInput.selectionEnd = cursor;
             }
         });
 
