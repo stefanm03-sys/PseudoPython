@@ -14,7 +14,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #5c5ebf;
+            background: #000000;
             background-image: linear-gradient(135deg, #5c5ebf 0%, #667eea 100%);
             color: #ddd;
             min-height: 100vh;
@@ -216,6 +216,9 @@
                     style="background: #1e1e1e; padding: 10px; border: 2px solid #555; border-radius: 5px; font-size: 0.9em; color: #ddd; white-space: pre; font-family: 'Consolas', 'Courier New', monospace;">
                     var x is 2
                     state(x)
+                    when x > 1 do
+                    state("x is greater than 1")
+                    endpt
                 </div>
             </div>
 
