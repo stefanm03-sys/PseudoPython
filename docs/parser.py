@@ -35,11 +35,16 @@ restart_stmt: "restart"                   -> restart_stmt
             | "Restart"                   -> restart_stmt
 
 if_stmt: "when" expr ","? "do"? program elif_block* else_block? "endpt" -> if_stmt
+       | "when" expr ","? "do"? "{" program "}" elif_block_brace* else_block_brace? -> if_stmt
 elif_block: "butIf" expr ","? "do"? program                              -> elif_block
+elif_block_brace: "butIf" expr ","? "do"? "{" program "}"               -> elif_block
 else_block: "else" program                                          -> else_block
+else_block_brace: "else" "{" program "}"                            -> else_block
 
 while_stmt: "repeat" "when" expr ","? "do"? program "endpt"          -> while_stmt
-repeat_amt_stmt: "repeat" "amt" "(" expr ")" program "endpt" -> repeat_amt_stmt
+          | "repeat" "when" expr ","? "do"? "{" program "}"          -> while_stmt
+repeat_amt_stmt: "repeat" "amt" "(" expr ")" program "endpt"         -> repeat_amt_stmt
+               | "repeat" "amt" "(" expr ")" "{" program "}"         -> repeat_amt_stmt
 
 ?wait_arg: DURATION                  -> duration_value
          | expr
