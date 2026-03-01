@@ -1,3 +1,6 @@
 Welcome to PseudoPy! Execucute PseudoPy through Microsoft VS Code or execute PseudoPy code in your terminal, with the same easy and readable information you'd expect from Python. PseudoPy is a Python-like language that is designed to be easy to read and write, while still being powerful and flexible. With PseudoPy, you can write code that is easy to understand and maintain, while still being able to do everything you need to do. Whether you're a beginner or an experienced programmer, PseudoPy is the perfect language for you!
 
+PseudoPy has a digital coding website if you do not have Windows devices.
+PseudoPy supports indentation and braces/brackets for blocks of code.
+
 https://stefanm03-sys.github.io/PseudoPython/index.html
