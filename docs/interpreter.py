@@ -53,7 +53,7 @@ def execute_stmt(stmt: dict, env: Environment):
     elif t == "execute":
         cmd_value = eval_expr(stmt["value"], env)
         if not isinstance(cmd_value, str):
-            raise make_error("PPY-TYPE-002")
+            raise make_error("PPY-TYPE-002", actual_type=type(cmd_value).__name__)
         try:
             subprocess.run(["cmd", "/c", cmd_value], check=True)
         except subprocess.CalledProcessError as exc:
@@ -66,7 +66,7 @@ def execute_stmt(stmt: dict, env: Environment):
     elif t == "repeat_amt":
         n = eval_expr(stmt["count"], env)
         if not isinstance(n, int):
-            raise make_error("PPY-TYPE-003")
+            raise make_error("PPY-TYPE-003", actual_type=type(n).__name__)
         if n < 0:
             raise make_error("PPY-RUNTIME-003", count=n)
         for _ in range(n):

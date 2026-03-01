@@ -277,6 +277,9 @@ endpt</div>
                 <h2>Execution</h2>
                 <p class="muted">Output and error are shown separately so PseudoPy failures are explicit.</p>
 
+                <div class="output-label">Executed PseudoPy Code</div>
+                <pre id="executedCode" class="output-box">(nothing executed yet)</pre>
+
                 <div class="output-label">Program Output</div>
                 <pre id="programOutput" class="output-box">(no output yet)</pre>
 
@@ -307,6 +310,7 @@ endpt`;
 
         const runtimeStatus = document.getElementById("runtimeStatus");
         const codeInput = document.getElementById("codeInput");
+        const executedCodeBox = document.getElementById("executedCode");
         const outputBox = document.getElementById("programOutput");
         const errorBox = document.getElementById("programError");
         const runBtn = document.getElementById("runBtn");
@@ -384,6 +388,8 @@ if "/home/pyodide" not in sys.path:
                 renderResult({ output: "", error: "Please enter PseudoPy code first." });
                 return;
             }
+            executedCodeBox.textContent = sourceCode;
+            executedCodeBox.className = "output-box";
 
             setBusy(true);
             setStatus("Running...");
@@ -440,6 +446,8 @@ print(json.dumps({
 
         function clearAll() {
             codeInput.value = "";
+            executedCodeBox.textContent = "(nothing executed yet)";
+            executedCodeBox.className = "output-box";
             outputBox.textContent = "(no output yet)";
             outputBox.className = "output-box";
             errorBox.textContent = "(no error)";

@@ -75,6 +75,7 @@ STRING: /"([^"\\]|\\.)*"/
 %import common.WS
 %ignore WS
 %ignore /#[^\n]*/
+%ignore /\/\/[^\n]*/
 """
 
 _parser = Lark(
