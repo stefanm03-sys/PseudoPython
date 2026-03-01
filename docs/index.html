@@ -84,6 +84,33 @@
             font-weight: 700;
         }
 
+        .tiny-notice {
+            margin-top: 12px;
+            padding: 10px 12px;
+            border: 1px solid #2d4b58;
+            border-radius: 10px;
+            background: #0d1a21b8;
+            max-width: 760px;
+        }
+
+        .tiny-notice-title {
+            font-size: 0.86rem;
+            color: #b8d2de;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .tiny-notice-list {
+            margin: 0 0 0 18px;
+            color: #cde2eb;
+            font-size: 0.84rem;
+            line-height: 1.35;
+        }
+
+        .tiny-notice-list li {
+            margin-bottom: 3px;
+        }
+
         .status {
             display: inline-flex;
             align-items: center;
@@ -461,6 +488,59 @@
             </div>
             <div class="version-head">PseudoPy - v0.1.1</div>
             <p class="sub">Run .ppy code directly in-browser with parser/runtime errors from PseudoPy!</p>
+            <section class="tiny-notice" aria-label="Recent, Small Changes">
+                <div class="tiny-notice-title">Recent Tiny Changes</div>
+                <ul class="tiny-notice-list">
+                    <li>Did not clarify comments, use <code>#</code> or <code>//</code> at the start of a line for comments. Use <code>/* */</code> to span multiple lines. </li>
+                    <li>Did not clarify conditions, <code>when</code> is if, <code>butif</code> is elif (else if), <code>else</code> is else</li>
+                    <li>Added braces/brackets support for coding</li><li>Did not clarify comments, use <code>#</code> or <code>//</code> at the start of a line for comments. Use <code>/* */</code> to span multiple lines
+                    <li>Added errors for infinite loops</li>
+
+</li>
+<li>Did not clarify conditions, <code>when</code> is if, <code>butif</code> is elif 
+(else if),
+    <code>else</code> is else</li>
+<li>Added braces/brackets support for coding</li>
+                    <li>Did not clarify comments, use <code>#</code> or <code>//</code> at the start of a 
+line for comments. Use
+    <code>/* */</code> to span multiple lines.
+</li>
+<li>Did not clarify conditions, <code>when</code> is if, <code>butif</code> is elif 
+(else if),
+    <code>else</code> is else</li>
+<li>Added braces/brackets support for coding</li><li>Did not clarify comments, use <code>#</code> or <code>//</code> at the start of a 
+line for comments. Use
+    <code>/* */</code> to span multiple lines.
+</li>
+<li>Did not clarify conditions, <code>when</code> is if, <code>butif</code> is elif 
+(else if),
+    <code>else</code> is else</li>
+<li>Added braces/brackets support for coding</li>
+                    <li>Did not clarify comments, use <code>#</code> or <code>//</code> at the start of a 
+line for comments. Use
+    <code>/* */</code> to span multiple lines.
+</li>
+<li>Did not clarify conditions, <code>when</code> is if, <code>butif</code> is elif 
+(else if),
+    <code>else</code> is else</li>
+<li>Added braces/brackets support for coding</li><li>Did not clarify comments, use <code>#</code> or <code>//</code> at the start of a 
+line for comments. Use
+    <code>/* */</code> to span multiple lines.
+</li>
+<li>Did not clarify conditions, <code>when</code> is if, <code>butif</code> is elif 
+(else if),
+    <code>else</code> is else</li>
+<li>Added braces/brackets support for coding</li>
+                    <li>Did not clarify comments, use <code>#</code> or <code>//</code> at the start of a 
+line for comments. Use
+    <code>/* */</code> to span multiple lines.
+</li>
+<li>Did not clarify conditions, <code>when</code> is if, <code>butif</code> is elif 
+(else if),
+    <code>else</code> is else</li>
+<li>Added braces/brackets support for coding</li>
+                </ul>
+            </section>
         </header>
 
         <div class="workspace">
@@ -468,6 +548,7 @@
                 <div class="sidebar-title">Workspace</div>
                 <button id="navCoding" class="nav-btn active" type="button">Coding</button>
                 <button id="navDocs" class="nav-btn" type="button">Docs</button>
+                <button id="navPatchNotes" class="nav-btn" type="button">Patch Notes</button>
             </aside>
 
             <section id="codingView" class="grid view">
@@ -514,6 +595,19 @@
                     <p class="muted">If embedded docs are blocked by the site, use "Open in new tab".</p>
                 </article>
             </section>
+
+            <section id="patchNotesView" class="docs-view view hidden">
+                <article class="docs-card">
+                    <div class="docs-head">
+                        <h2>Patch Notes</h2>
+                        <a id="patchExternalLink" class="docs-link" href="#" target="_blank"
+                            rel="noopener noreferrer">Open in new tab</a>
+                    </div>
+                    <p class="muted">Version history and release notes.</p>
+                    <div id="patchUrlLabel" class="docs-url"></div>
+                    <iframe id="patchFrame" class="docs-frame" title="PseudoPy patch notes" loading="lazy"></iframe>
+                </article>
+            </section>
         </div>
     </main>
 
@@ -553,6 +647,7 @@ endpt
 do x + 1
 stateBool(true)`;
         const DOCS_LINK = "./pseudopydoc.pdf";
+        const PATCH_NOTES_LINK = "./patch-notes/latest.html";
 
         function pickInitialCode() {
             // 1 in 4 chance to show the alternate welcome snippet.
@@ -575,11 +670,16 @@ stateBool(true)`;
         const uploadInput = document.getElementById("uploadInput");
         const navCoding = document.getElementById("navCoding");
         const navDocs = document.getElementById("navDocs");
+        const navPatchNotes = document.getElementById("navPatchNotes");
         const codingView = document.getElementById("codingView");
         const docsView = document.getElementById("docsView");
+        const patchNotesView = document.getElementById("patchNotesView");
         const docsFrame = document.getElementById("docsFrame");
         const docsUrlLabel = document.getElementById("docsUrlLabel");
         const docsExternalLink = document.getElementById("docsExternalLink");
+        const patchFrame = document.getElementById("patchFrame");
+        const patchUrlLabel = document.getElementById("patchUrlLabel");
+        const patchExternalLink = document.getElementById("patchExternalLink");
         const exampleCode = document.getElementById("exampleCode");
 
         function initializeCodeEditor() {
@@ -620,12 +720,19 @@ stateBool(true)`;
 
         function activateView(viewName) {
             const codingActive = viewName === "coding";
+            const docsActive = viewName === "docs";
+            const patchActive = viewName === "patch";
             codingView.classList.toggle("hidden", !codingActive);
-            docsView.classList.toggle("hidden", codingActive);
+            docsView.classList.toggle("hidden", !docsActive);
+            patchNotesView.classList.toggle("hidden", !patchActive);
             navCoding.classList.toggle("active", codingActive);
-            navDocs.classList.toggle("active", !codingActive);
-            if (!codingActive && !docsFrame.src) {
+            navDocs.classList.toggle("active", docsActive);
+            navPatchNotes.classList.toggle("active", patchActive);
+            if (docsActive && !docsFrame.src) {
                 docsFrame.src = DOCS_LINK;
+            }
+            if (patchActive && !patchFrame.src) {
+                patchFrame.src = PATCH_NOTES_LINK;
             }
         }
 
@@ -856,6 +963,7 @@ result_json
         });
         navCoding.addEventListener("click", () => activateView("coding"));
         navDocs.addEventListener("click", () => activateView("docs"));
+        navPatchNotes.addEventListener("click", () => activateView("patch"));
 
         codeInput.addEventListener("keydown", (event) => {
             const tabSize = 4;
@@ -941,6 +1049,8 @@ result_json
             exampleCode.textContent = EXAMPLE_SNIPPET;
             docsUrlLabel.textContent = DOCS_LINK;
             docsExternalLink.href = DOCS_LINK;
+            patchUrlLabel.textContent = PATCH_NOTES_LINK;
+            patchExternalLink.href = PATCH_NOTES_LINK;
             try {
                 await ensurePyodideReady();
             } catch (error) {
