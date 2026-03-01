@@ -1,21 +1,23 @@
 @echo off
 setlocal
-cd /d "%~dp0"
 
 if "%~1"=="" (
   echo Usage: run_ppy.bat ^<file.ppy^>
   exit /b 1
 )
 
+for %%I in ("%~1") do set "PPY_FILE=%%~fI"
+cd /d "%~dp0"
+
 where py >nul 2>nul
 if %errorlevel%==0 (
-  py main.py "%~1"
-  exit /b %errorlevel%
+  py -3.12 main.py "%PPY_FILE%"
+  if %errorlevel%==0 exit /b 0
 )
 
 where python >nul 2>nul
 if %errorlevel%==0 (
-  python main.py "%~1"
+  python main.py "%PPY_FILE%"
   exit /b %errorlevel%
 )
 

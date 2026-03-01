@@ -7,7 +7,8 @@
     <!-- Pages redeploy trigger -->
     <title>PseudoPy Online Executor</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/theme/material-darker.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/theme/material-darker.min.css">
     <style>
         :root {
             --bg-0: #0b1418;
@@ -420,7 +421,7 @@
                 <h1>PseudoPy Web Executor</h1>
                 <div id="runtimeStatus" class="status">Initializing runtime...</div>
             </div>
-            <div class="version-head">PseudoPy - v0</div>
+            <div class="version-head">PseudoPy - v0.1</div>
             <p class="sub">Run .ppy code directly in-browser with parser/runtime errors from PseudoPy!</p>
         </header>
 
@@ -753,18 +754,34 @@ result_json
             errorBox.className = "output-box";
         }
 
-        function downloadPpyFile() {
+        async function downloadPpyFile() {
             const sourceCode = getSourceCode();
             if (!/\S/.test(sourceCode)) {
                 renderResult({ output: "", error: "No code to save! Write PseudoPy code first." });
                 return;
             }
             const text = sourceCode.endsWith("\n") ? sourceCode : `${sourceCode}\n`;
-            const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+            const file = new File([text], "program.ppy", { type: "application/octet-stream" });
+
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        title: "PseudoPy program",
+                        text: "Save your .ppy file",
+                        files: [file]
+                    });
+                    setStatus("Saved .ppy file!", "ok");
+                    return;
+                } catch (error) {
+                    // If share is cancelled or fails, continue with direct download fallback.
+                }
+            }
+
+            const blob = new Blob([text], { type: "application/octet-stream" });
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = url;
-            link.download = "program.ppy";
+            link.setAttribute("download", "program.ppy");
             document.body.appendChild(link);
             link.click();
             link.remove();

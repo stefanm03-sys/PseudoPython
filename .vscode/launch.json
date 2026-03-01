@@ -2,11 +2,20 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run PseudoPy (current workspace)",
-      "type": "python",
+      "name": "Run PseudoPy (pseudo.ppy)",
+      "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/main.py",
-      "args": ["pseudo.ppy"],
+      "program": "${workspaceFolder}/src/main.py",
+      "args": ["${workspaceFolder}/pseudo.ppy"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Run PseudoPy (active .ppy file)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/main.py",
+      "args": ["${file}"],
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}"
     }
