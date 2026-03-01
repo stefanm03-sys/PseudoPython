@@ -180,6 +180,44 @@
             border-color: #36c9a8;
         }
 
+        /* PseudoPy token palette overrides */
+        .cm-s-material-darker .cm-keyword {
+            color: #7ad6ff;
+            font-weight: 700;
+        }
+
+        .cm-s-material-darker .cm-def {
+            color: #ffcf70;
+            font-weight: 700;
+        }
+
+        .cm-s-material-darker .cm-atom {
+            color: #7ee7a8;
+            font-weight: 700;
+        }
+
+        .cm-s-material-darker .cm-number {
+            color: #ff9b85;
+        }
+
+        .cm-s-material-darker .cm-string {
+            color: #c9f27c;
+        }
+
+        .cm-s-material-darker .cm-comment {
+            color: #7c93a2;
+            font-style: italic;
+        }
+
+        .cm-s-material-darker .cm-operator {
+            color: #b9adff;
+            font-weight: 700;
+        }
+
+        .cm-s-material-darker .cm-variable {
+            color: #e6eef4;
+        }
+
         .button-row {
             margin-top: 12px;
             display: flex;
@@ -485,7 +523,7 @@
     <script>
         CodeMirror.defineSimpleMode("pseudopy", {
             start: [
-                { regex: /(?:var|is|when|butIf|else|do|repeat|amt|endpt|stop|restart|ask|execute)\b/, token: "keyword" },
+                { regex: /(?:var|is|when|butIf|else|do|repeat|amt|endpt|stop|restart|ask|execute|wait)\b/, token: "keyword" },
                 { regex: /(?:state|stateStr|stateInt|stateFloat|stateBool)\b/, token: "def" },
                 { regex: /(?:true|false|none|ignore|TRUE|FALSE)\b/, token: "atom" },
                 { regex: /(?:and|or)\b/, token: "keyword" },

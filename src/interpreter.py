@@ -1,6 +1,7 @@
 # interpreter.py
 import subprocess
 import math
+import time
 
 from ppy_errors import make_error
 from runtime import Environment, truthy, ensure_number
@@ -12,6 +13,9 @@ class _LoopStopSignal(Exception):
 
 class _LoopRestartSignal(Exception):
     pass
+
+
+MAX_LOOP_ITERATIONS = 100000
 
 
 def _ensure_finite_number(value, op: str):
@@ -52,6 +56,9 @@ def execute_stmt(stmt: dict, env: Environment, loop_depth: int = 0):
         if not isinstance(value, bool):
             raise make_error("PPY-TYPE-006", actual_type=type(value).__name__)
         print("true" if value else "false")
+    elif t == "wait":
+        delay_seconds = eval_wait_delay(stmt["value"], env)
+        time.sleep(delay_seconds)
     elif t == "stop":
         if loop_depth <= 0:
             raise make_error("PPY-RUNTIME-006")
@@ -76,7 +83,11 @@ def execute_stmt(stmt: dict, env: Environment, loop_depth: int = 0):
                 for s in stmt["else"]:
                     execute_stmt(s, env, loop_depth=loop_depth)
     elif t == "while":
+        iterations = 0
         while truthy(eval_expr(stmt["condition"], env)):
+            iterations += 1
+            if iterations > MAX_LOOP_ITERATIONS:
+                raise make_error("PPY-RUNTIME-008", limit=MAX_LOOP_ITERATIONS)
             try:
                 for s in stmt["body"]:
                     execute_stmt(s, env, loop_depth=loop_depth + 1)
@@ -104,7 +115,11 @@ def execute_stmt(stmt: dict, env: Environment, loop_depth: int = 0):
         if n < 0:
             raise make_error("PPY-RUNTIME-003", count=n)
         i = 0
+        iterations = 0
         while i < n:
+            iterations += 1
+            if iterations > MAX_LOOP_ITERATIONS:
+                raise make_error("PPY-RUNTIME-008", limit=MAX_LOOP_ITERATIONS)
             try:
                 for s in stmt["body"]:
                     execute_stmt(s, env, loop_depth=loop_depth + 1)
@@ -213,3 +228,24 @@ def eval_expr(expr: dict, env: Environment):
             return truthy(left) or truthy(right)
 
     raise make_error("PPY-RUNTIME-005", expr_type=t)
+
+
+def eval_wait_delay(value_expr: dict, env: Environment) -> float:
+    if isinstance(value_expr, dict) and value_expr.get("type") == "duration":
+        base = float(value_expr["value"])
+        unit = value_expr["unit"]
+        if unit == "ms":
+            seconds = base / 1000.0
+        elif unit == "m":
+            seconds = base * 60.0
+        else:
+            seconds = base
+    else:
+        raw = eval_expr(value_expr, env)
+        if not isinstance(raw, (int, float)):
+            raise make_error("PPY-TYPE-007", actual_type=type(raw).__name__)
+        seconds = float(raw)
+
+    if seconds < 0:
+        raise make_error("PPY-TYPE-007", actual_type="negative")
+    return seconds
