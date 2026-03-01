@@ -39,6 +39,11 @@ def execute_stmt(stmt: dict, env: Environment, loop_depth: int = 0):
         env.assign(stmt["name"], eval_expr(stmt["value"], env))
     elif t == "print":
         print(eval_expr(stmt["value"], env))
+    elif t == "is":
+        value = eval_expr(stmt["value"], env)
+        if not isinstance(value, bool):
+            raise make_error("PPY-TYPE-006", actual_type=type(value).__name__)
+        print("true" if value else "false")
     elif t == "stop":
         if loop_depth <= 0:
             raise make_error("PPY-RUNTIME-006")

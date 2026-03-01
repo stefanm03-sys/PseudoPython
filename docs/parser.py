@@ -12,6 +12,7 @@ program: statement*
 ?statement: let_stmt
           | assign_stmt
           | print_stmt
+          | is_stmt
           | do_stmt
           | execute_stmt
           | stop_stmt
@@ -23,6 +24,7 @@ program: statement*
 let_stmt: "var" NAME "is" expr      -> let_stmt
 assign_stmt: NAME "is" expr         -> assign_stmt
 print_stmt: ("state" | "stateStr" | "stateInt" | "stateFloat" | "stateBool") "(" expr ")" -> print_stmt
+is_stmt: "is" expr                   -> is_stmt
 do_stmt: "do" expr                  -> print_stmt
 execute_stmt: "execute" "(" expr ")"      -> execute_stmt
 stop_stmt: "stop"                         -> stop_stmt
@@ -119,6 +121,9 @@ class ASTBuilder(Transformer):
 
     def print_stmt(self, expr):
         return {"type": "print", "value": expr}
+
+    def is_stmt(self, expr):
+        return {"type": "is", "value": expr}
 
     def if_stmt(self, cond, then_block, *rest):
         elifs = []
