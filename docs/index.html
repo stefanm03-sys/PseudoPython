@@ -413,7 +413,7 @@
             <section id="codingView" class="grid view">
                 <article class="card">
                     <h2>Editor</h2>
-                    <p class="muted">Write PseudoPy and press <code>Ctrl+Enter</code> to run.</p>
+                    <p class="muted">Write PseudoPy (PDF-aligned syntax) and press <code>Ctrl+Enter</code> to run.</p>
                     <textarea id="codeInput" spellcheck="false"></textarea>
                     <div class="button-row">
                         <button id="runBtn" class="run-btn" type="button">Run PseudoPy</button>
@@ -423,10 +423,11 @@
                         <input id="uploadInput" type="file" accept=".ppy,text/plain" class="hidden">
                     </div>
                     <div class="example">var x is 2
-                        state(x)
-                        when x > 1 do
-                        state("x is greater than 1")
-                        endpt</div>
+when x > 1, do
+    stateStr("x is greater than 1")
+endpt
+do x + 1
+stateBool(true)</div>
                 </article>
 
                 <article class="card">

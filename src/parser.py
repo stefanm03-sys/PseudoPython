@@ -12,21 +12,29 @@ program: statement*
 ?statement: let_stmt
           | assign_stmt
           | print_stmt
+          | do_stmt
           | execute_stmt
+          | stop_stmt
+          | restart_stmt
           | if_stmt
           | while_stmt
           | repeat_amt_stmt
 
 let_stmt: "var" NAME "is" expr      -> let_stmt
 assign_stmt: NAME "is" expr         -> assign_stmt
-print_stmt: "state" "(" expr ")"          -> print_stmt
+print_stmt: ("state" | "stateStr" | "stateInt" | "stateFloat" | "stateBool") "(" expr ")" -> print_stmt
+do_stmt: "do" expr                  -> print_stmt
 execute_stmt: "execute" "(" expr ")"      -> execute_stmt
+stop_stmt: "stop"                         -> stop_stmt
+         | "Stop"                         -> stop_stmt
+restart_stmt: "restart"                   -> restart_stmt
+            | "Restart"                   -> restart_stmt
 
-if_stmt: "when" expr "do" program elif_block* else_block? "endpt" -> if_stmt
-elif_block: "butIf" expr "do" program                              -> elif_block
+if_stmt: "when" expr ","? "do"? program elif_block* else_block? "endpt" -> if_stmt
+elif_block: "butIf" expr ","? "do"? program                              -> elif_block
 else_block: "else" program                                          -> else_block
 
-while_stmt: "repeat" "when" expr "do" program "endpt"          -> while_stmt
+while_stmt: "repeat" "when" expr ","? "do"? program "endpt"          -> while_stmt
 repeat_amt_stmt: "repeat" "amt" "(" expr ")" program "endpt" -> repeat_amt_stmt
 
 ?expr: or_expr
@@ -62,6 +70,10 @@ repeat_amt_stmt: "repeat" "amt" "(" expr ")" program "endpt" -> repeat_amt_stmt
      | STRING                        -> string
      | "TRUE"                        -> true
      | "FALSE"                       -> false
+     | "true"                        -> true
+     | "false"                       -> false
+     | "none"                        -> none_lit
+     | "ignore"                      -> none_lit
      | ask_expr
      | NAME                          -> var
      | "(" expr ")"
@@ -86,6 +98,12 @@ _parser = Lark(
 
 @v_args(inline=True)
 class ASTBuilder(Transformer):
+    def stop_stmt(self):
+        return {"type": "stop"}
+
+    def restart_stmt(self):
+        return {"type": "restart"}
+
     def execute_stmt(self, value):
         return {"type": "execute", "value": value}
 
@@ -143,6 +161,9 @@ class ASTBuilder(Transformer):
 
     def false(self):
         return {"type": "bool", "value": False}
+
+    def none_lit(self):
+        return {"type": "none", "value": None}
 
     def var(self, tok):
         return {"type": "var", "name": str(tok)}

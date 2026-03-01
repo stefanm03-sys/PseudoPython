@@ -5,9 +5,17 @@ from ppy_errors import make_error
 from runtime import Environment, truthy, ensure_number
 
 
+class _LoopStopSignal(Exception):
+    pass
+
+
+class _LoopRestartSignal(Exception):
+    pass
+
+
 def interpret(ast: dict):
     env = Environment()
-    execute_program(ast, env)
+    execute_program(ast, env, loop_depth=0)
 
 
 
@@ -15,14 +23,14 @@ def interpret(ast: dict):
 
 
 
-def execute_program(node: dict, env: Environment):
+def execute_program(node: dict, env: Environment, loop_depth: int = 0):
     if node.get("type") != "program":
         raise make_error("PPY-RUNTIME-002")
     for stmt in node["statements"]:
-        execute_stmt(stmt, env)
+        execute_stmt(stmt, env, loop_depth=loop_depth)
 
 
-def execute_stmt(stmt: dict, env: Environment):
+def execute_stmt(stmt: dict, env: Environment, loop_depth: int = 0):
     t = stmt["type"]
 
     if t == "let":
@@ -31,25 +39,38 @@ def execute_stmt(stmt: dict, env: Environment):
         env.assign(stmt["name"], eval_expr(stmt["value"], env))
     elif t == "print":
         print(eval_expr(stmt["value"], env))
+    elif t == "stop":
+        if loop_depth <= 0:
+            raise make_error("PPY-RUNTIME-006")
+        raise _LoopStopSignal()
+    elif t == "restart":
+        if loop_depth <= 0:
+            raise make_error("PPY-RUNTIME-007")
+        raise _LoopRestartSignal()
     elif t == "if":
         if truthy(eval_expr(stmt["condition"], env)):
             for s in stmt["then"]:
-                execute_stmt(s, env)
+                execute_stmt(s, env, loop_depth=loop_depth)
         else:
             matched = False
             for branch in stmt.get("elifs", []):
                 if truthy(eval_expr(branch["condition"], env)):
                     for s in branch["body"]:
-                        execute_stmt(s, env)
+                        execute_stmt(s, env, loop_depth=loop_depth)
                     matched = True
                     break
             if not matched:
                 for s in stmt["else"]:
-                    execute_stmt(s, env)
+                    execute_stmt(s, env, loop_depth=loop_depth)
     elif t == "while":
         while truthy(eval_expr(stmt["condition"], env)):
-            for s in stmt["body"]:
-                execute_stmt(s, env)
+            try:
+                for s in stmt["body"]:
+                    execute_stmt(s, env, loop_depth=loop_depth + 1)
+            except _LoopRestartSignal:
+                continue
+            except _LoopStopSignal:
+                break
     elif t == "execute":
         cmd_value = eval_expr(stmt["value"], env)
         if not isinstance(cmd_value, str):
@@ -69,9 +90,17 @@ def execute_stmt(stmt: dict, env: Environment):
             raise make_error("PPY-TYPE-003", actual_type=type(n).__name__)
         if n < 0:
             raise make_error("PPY-RUNTIME-003", count=n)
-        for _ in range(n):
-            for s in stmt["body"]:
-                execute_stmt(s, env)
+        i = 0
+        while i < n:
+            try:
+                for s in stmt["body"]:
+                    execute_stmt(s, env, loop_depth=loop_depth + 1)
+            except _LoopRestartSignal:
+                i = 0
+                continue
+            except _LoopStopSignal:
+                break
+            i += 1
 
 
     else:
@@ -84,6 +113,8 @@ def eval_expr(expr: dict, env: Environment):
     if t == "number":
         return expr["value"]
     if t == "string":
+        return expr["value"]
+    if t == "none":
         return expr["value"]
     if t == "bool":
         return expr["value"]
