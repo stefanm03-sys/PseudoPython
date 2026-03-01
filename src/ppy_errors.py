@@ -5,7 +5,7 @@ ERROR_TEMPLATES = {
     "PPY-CLI-001": "[PPY-CLI-001] Usage: python main.py <file.ppy>",
     "PPY-IO-404": "[PPY-IO-404] File not found! Could be invalid: {path}",
     "PPY-IO-002": "[PPY-IO-002] Input file must end with .ppy! May be invalid: {path}",
-    "PPY-PARSE-001": "[PPY-PARSE-001] Syntax error at line {line}, collumn {column}. Check for errors: {detail}",
+    "PPY-PARSE-001": "[PPY-PARSE-001] Syntax error at line {line}, collumn {column}! There may be mispelling or errors: {detail}",
     "PPY-RUNTIME-001": "[PPY-RUNTIME-001] Undefined variable. Possible error: {name}",
     "PPY-RUNTIME-002": "[PPY-RUNTIME-002] Top-level AST node must be program",
     "PPY-RUNTIME-003": "[PPY-RUNTIME-003] repeat amt(...) cannot be negative. Not possible: {count}",

@@ -107,7 +107,7 @@
             display: grid;
             grid-template-columns: 1.1fr 0.9fr;
             gap: 18px;
-            padding: 22px;
+            padding: 18px;
         }
 
         .card {
@@ -155,6 +155,7 @@
             margin-top: 12px;
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         button {
@@ -172,6 +173,10 @@
             transform: translateY(-1px);
         }
 
+        .button-row button {
+            flex: 1 1 160px;
+        }
+
         .run-btn {
             background: linear-gradient(130deg, #18c29c, #139f87);
             color: #032017;
@@ -182,6 +187,18 @@
             background: linear-gradient(130deg, #e57d46, #d06b3b);
             color: #2a1306;
             border-color: #f4a261;
+        }
+
+        .save-btn {
+            background: linear-gradient(130deg, #77b5fe, #4f8ad4);
+            color: #031a33;
+            border-color: #90c4ff;
+        }
+
+        .upload-btn {
+            background: linear-gradient(130deg, #d6b3ff, #a57ae5);
+            color: #221136;
+            border-color: #d9c2ff;
         }
 
         .example {
@@ -231,9 +248,128 @@
             opacity: 0.75;
         }
 
+        .workspace {
+            display: grid;
+            grid-template-columns: 190px 1fr;
+            min-height: 620px;
+        }
+
+        .sidebar {
+            border-right: 1px solid #284451;
+            padding: 16px;
+            background: #0d1a21;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-title {
+            color: var(--muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 6px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            text-align: left;
+            background: #132833;
+            border: 1px solid #2f5663;
+            color: #dceaf0;
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(130deg, #18c29c, #139f87);
+            color: #032017;
+            border-color: #21d8af;
+        }
+
+        .view {
+            min-width: 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .docs-view {
+            padding: 18px;
+        }
+
+        .docs-card {
+            border: 1px solid var(--panel-border);
+            background: var(--panel);
+            border-radius: 14px;
+            padding: 16px;
+            min-height: 540px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .docs-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .docs-link {
+            color: #9cd4ff;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .docs-link:hover {
+            text-decoration: underline;
+        }
+
+        .docs-url {
+            background: #091218;
+            border: 1px solid #2a4450;
+            border-radius: 10px;
+            padding: 10px;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 0.84rem;
+            overflow-wrap: anywhere;
+            color: #d0e7f2;
+        }
+
+        .docs-frame {
+            width: 100%;
+            min-height: 420px;
+            border: 1px solid #2a4450;
+            border-radius: 10px;
+            background: #091218;
+        }
+
         @media (max-width: 920px) {
             body {
                 padding: 12px;
+            }
+
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                border-right: 0;
+                border-bottom: 1px solid #284451;
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: center;
+            }
+
+            .sidebar-title {
+                width: 100%;
+                margin-bottom: 2px;
+            }
+
+            .nav-btn {
+                width: auto;
+                flex: 1 1 140px;
             }
 
             .grid {
@@ -257,36 +393,60 @@
             <p class="sub">Run .ppy code directly in-browser with parser/runtime errors from PseudoPy.</p>
         </header>
 
-        <section class="grid">
-            <article class="card">
-                <h2>Editor</h2>
-                <p class="muted">Write PseudoPy and press <code>Ctrl+Enter</code> to run.</p>
-                <textarea id="codeInput" spellcheck="false"></textarea>
-                <div class="button-row">
-                    <button id="runBtn" class="run-btn" type="button">Run PseudoPy</button>
-                    <button id="clearBtn" class="clear-btn" type="button">Clear</button>
-                </div>
-                <div class="example">var x is 2
+        <div class="workspace">
+            <aside class="sidebar">
+                <div class="sidebar-title">Workspace</div>
+                <button id="navCoding" class="nav-btn active" type="button">Coding</button>
+                <button id="navDocs" class="nav-btn" type="button">Docs</button>
+            </aside>
+
+            <section id="codingView" class="grid view">
+                <article class="card">
+                    <h2>Editor</h2>
+                    <p class="muted">Write PseudoPy and press <code>Ctrl+Enter</code> to run.</p>
+                    <textarea id="codeInput" spellcheck="false"></textarea>
+                    <div class="button-row">
+                        <button id="runBtn" class="run-btn" type="button">Run PseudoPy</button>
+                        <button id="clearBtn" class="clear-btn" type="button">Clear</button>
+                        <button id="downloadBtn" class="save-btn" type="button">Save .ppy</button>
+                        <button id="uploadBtn" class="upload-btn" type="button">Open .ppy</button>
+                        <input id="uploadInput" type="file" accept=".ppy,text/plain" class="hidden">
+                    </div>
+                    <div class="example">var x is 2
 state(x)
 when x > 1 do
     state("x is greater than 1")
 endpt</div>
-            </article>
+                </article>
 
-            <article class="card">
-                <h2>Execution</h2>
-                <p class="muted">Output and error are shown separately so PseudoPy failures are explicit.</p>
+                <article class="card">
+                    <h2>Execution</h2>
+                    <p class="muted">Output and error are shown separately so PseudoPy failures are explicit.</p>
 
-                <div class="output-label">Executed PseudoPy Code</div>
-                <pre id="executedCode" class="output-box">(nothing executed yet)</pre>
+                    <div class="output-label">Executed PseudoPy Code</div>
+                    <pre id="executedCode" class="output-box">(nothing executed yet)</pre>
 
-                <div class="output-label">Program Output</div>
-                <pre id="programOutput" class="output-box">(no output yet)</pre>
+                    <div class="output-label">Program Output</div>
+                    <pre id="programOutput" class="output-box">(no output yet)</pre>
 
-                <div class="output-label">PseudoPy Error</div>
-                <pre id="programError" class="output-box">(no error)</pre>
-            </article>
-        </section>
+                    <div class="output-label">PseudoPy Error</div>
+                    <pre id="programError" class="output-box">(no error)</pre>
+                </article>
+            </section>
+
+            <section id="docsView" class="docs-view view hidden">
+                <article class="docs-card">
+                    <div class="docs-head">
+                        <h2>Docs</h2>
+                        <a id="docsExternalLink" class="docs-link" href="#" target="_blank" rel="noopener noreferrer">Open in new tab</a>
+                    </div>
+                    <p class="muted">Documentation link loaded below.</p>
+                    <div id="docsUrlLabel" class="docs-url"></div>
+                    <iframe id="docsFrame" class="docs-frame" title="PseudoPy documentation" loading="lazy"></iframe>
+                    <p class="muted">If embedded docs are blocked by the site, use "Open in new tab".</p>
+                </article>
+            </section>
+        </div>
     </main>
 
     <script async src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
@@ -304,6 +464,7 @@ state(x)
 when x > 1 do
     state("x is greater than 1")
 endpt`;
+        const DOCS_LINK = "https://docs.google.com/document/d/1-adb9pa95Z382h-DFUuLVZvLo7gkTVxjXgzQd2BkNUk/edit?usp=sharing";
 
         let pyodide = null;
         let runtimeReady = false;
@@ -315,10 +476,31 @@ endpt`;
         const errorBox = document.getElementById("programError");
         const runBtn = document.getElementById("runBtn");
         const clearBtn = document.getElementById("clearBtn");
+        const downloadBtn = document.getElementById("downloadBtn");
+        const uploadBtn = document.getElementById("uploadBtn");
+        const uploadInput = document.getElementById("uploadInput");
+        const navCoding = document.getElementById("navCoding");
+        const navDocs = document.getElementById("navDocs");
+        const codingView = document.getElementById("codingView");
+        const docsView = document.getElementById("docsView");
+        const docsFrame = document.getElementById("docsFrame");
+        const docsUrlLabel = document.getElementById("docsUrlLabel");
+        const docsExternalLink = document.getElementById("docsExternalLink");
 
         function setStatus(message, className = "") {
             runtimeStatus.textContent = message;
             runtimeStatus.className = className ? `status ${className}` : "status";
+        }
+
+        function activateView(viewName) {
+            const codingActive = viewName === "coding";
+            codingView.classList.toggle("hidden", !codingActive);
+            docsView.classList.toggle("hidden", codingActive);
+            navCoding.classList.toggle("active", codingActive);
+            navDocs.classList.toggle("active", !codingActive);
+            if (!codingActive && !docsFrame.src) {
+                docsFrame.src = DOCS_LINK;
+            }
         }
 
         async function loadRuntimeFiles() {
@@ -484,8 +666,54 @@ result_json
             errorBox.className = "output-box";
         }
 
+        function downloadPpyFile() {
+            const sourceCode = String(codeInput.value ?? "");
+            if (!/\S/.test(sourceCode)) {
+                renderResult({ output: "", error: "No code to save. Write PseudoPy code first." });
+                return;
+            }
+            const text = sourceCode.endsWith("\n") ? sourceCode : `${sourceCode}\n`;
+            const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "program.ppy";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+            setStatus("Saved .ppy file", "ok");
+        }
+
+        async function loadPpyFile(file) {
+            if (!file) return;
+            const name = String(file.name || "");
+            if (name && !name.toLowerCase().endsWith(".ppy")) {
+                renderResult({ output: "", error: "Please upload a .ppy file." });
+                return;
+            }
+            const content = await file.text();
+            codeInput.value = content.replace(/\r\n/g, "\n");
+            activateView("coding");
+            setStatus(`Loaded ${name || ".ppy file"}`, "ok");
+        }
+
         runBtn.addEventListener("click", runCode);
         clearBtn.addEventListener("click", clearAll);
+        downloadBtn.addEventListener("click", downloadPpyFile);
+        uploadBtn.addEventListener("click", () => uploadInput.click());
+        uploadInput.addEventListener("change", async () => {
+            try {
+                const file = uploadInput.files && uploadInput.files[0] ? uploadInput.files[0] : null;
+                await loadPpyFile(file);
+            } catch (error) {
+                renderResult({ output: "", error: `Could not read file: ${error.message}` });
+            } finally {
+                uploadInput.value = "";
+            }
+        });
+        navCoding.addEventListener("click", () => activateView("coding"));
+        navDocs.addEventListener("click", () => activateView("docs"));
 
         codeInput.addEventListener("keydown", (event) => {
             const tabSize = 4;
@@ -567,6 +795,8 @@ result_json
 
         window.addEventListener("load", async () => {
             codeInput.value = EXAMPLE_CODE;
+            docsUrlLabel.textContent = DOCS_LINK;
+            docsExternalLink.href = DOCS_LINK;
             try {
                 await ensurePyodideReady();
             } catch (error) {
