@@ -318,7 +318,7 @@ endpt`;
 
         function setStatus(message, className = "") {
             runtimeStatus.textContent = message;
-            runtimeStatus.className = `status ${className}`.trim();
+            runtimeStatus.className = className ? `status ${className}` : "status";
         }
 
         async function loadRuntimeFiles() {
@@ -369,7 +369,8 @@ if "/home/pyodide" not in sys.path:
         }
 
         function renderResult(result) {
-            const outputText = result.output && result.output.trim().length > 0 ? result.output : "(no output)";
+            const outputValue = typeof result?.output === "string" ? result.output : "";
+            const outputText = /\S/.test(outputValue) ? outputValue : "(no output)";
             outputBox.textContent = outputText;
             outputBox.className = `output-box ${result.error ? "notice" : "ok"}`;
 
@@ -383,8 +384,8 @@ if "/home/pyodide" not in sys.path:
         }
 
         async function runCode() {
-            const sourceCode = codeInput.value.trimEnd();
-            if (!sourceCode.trim()) {
+            const sourceCode = String(codeInput.value ?? "").replace(/\s+$/, "");
+            if (!/\S/.test(sourceCode)) {
                 renderResult({ output: "", error: "Please enter PseudoPy code first." });
                 return;
             }
@@ -395,10 +396,11 @@ if "/home/pyodide" not in sys.path:
             setStatus("Running...");
 
             try {
+                let rawResult;
                 await ensurePyodideReady();
                 pyodide.globals.set("USER_SOURCE", sourceCode);
 
-                const rawResult = await pyodide.runPythonAsync(`
+                rawResult = await pyodide.runPythonAsync(`
 import io
 import json
 from contextlib import redirect_stdout
@@ -421,15 +423,14 @@ except PseudoPyError as exc:
 except Exception as exc:
     error = str(make_error("PPY-INTERNAL-001", detail=str(exc)))
 
-print(json.dumps({
+result_json = json.dumps({
     "output": buf.getvalue().rstrip("\\n"),
     "error": error
-}))
+})
+result_json
 `);
 
-                const lines = rawResult.trim().split("\n");
-                const payload = lines[lines.length - 1];
-                const result = JSON.parse(payload);
+                const result = JSON.parse(String(rawResult ?? "{\"output\":\"\",\"error\":\"No runtime result returned.\"}"));
                 renderResult(result);
                 setStatus(result.error ? "Runtime finished with PseudoPy error" : "Runtime ready", result.error ? "" : "ok");
             } catch (error) {
@@ -474,6 +475,18 @@ print(json.dumps({
                 });
                 setStatus("Runtime failed to load", "error");
             }
+        });
+
+        window.addEventListener("error", (event) => {
+            const file = event.filename ? event.filename.split("/").pop() : "unknown";
+            const line = event.lineno || "?";
+            const col = event.colno || "?";
+            const msg = event.message || "Unknown browser error";
+            renderResult({
+                output: "",
+                error: `Website JS error at ${file}:${line}:${col}: ${msg}`
+            });
+            setStatus("Runtime failed to load", "error");
         });
     </script>
 </body>
