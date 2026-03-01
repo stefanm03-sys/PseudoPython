@@ -219,6 +219,7 @@
             font-family: "Consolas", "Courier New", monospace;
             color: #d4e9f1;
             font-size: 0.85rem;
+            tab-size: 4;
         }
 
         .output-box {
@@ -422,12 +423,7 @@
                         <button id="uploadBtn" class="upload-btn" type="button">Open .ppy</button>
                         <input id="uploadInput" type="file" accept=".ppy,text/plain" class="hidden">
                     </div>
-                    <div class="example">var x is 2
-when x > 1, do
-    stateStr("x is greater than 1")
-endpt
-do x + 1
-stateBool(true)</div>
+                    <pre id="exampleCode" class="example"></pre>
                 </article>
 
                 <article class="card">
@@ -473,6 +469,12 @@ stateBool(true)</div>
 
         const HELLO_WORLD_CODE = `state("Hello World!")`;
         const HELLO_PSEUDOPY_CODE = `state("Hello PsuedoPy!")`;
+        const EXAMPLE_SNIPPET = `var x is 2
+when x > 1, do
+    stateStr("x is greater than 1")
+endpt
+do x + 1
+stateBool(true)`;
         const DOCS_LINK = "./pseudopydoc.pdf";
 
         function pickInitialCode() {
@@ -500,6 +502,7 @@ stateBool(true)</div>
         const docsFrame = document.getElementById("docsFrame");
         const docsUrlLabel = document.getElementById("docsUrlLabel");
         const docsExternalLink = document.getElementById("docsExternalLink");
+        const exampleCode = document.getElementById("exampleCode");
 
         function setStatus(message, className = "") {
             runtimeStatus.textContent = message;
@@ -809,6 +812,7 @@ result_json
 
         window.addEventListener("load", async () => {
             codeInput.value = pickInitialCode();
+            exampleCode.textContent = EXAMPLE_SNIPPET;
             docsUrlLabel.textContent = DOCS_LINK;
             docsExternalLink.href = DOCS_LINK;
             try {
