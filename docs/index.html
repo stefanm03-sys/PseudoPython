@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -390,6 +391,7 @@
         }
     </style>
 </head>
+
 <body>
     <main class="shell">
         <header class="hero">
@@ -398,7 +400,7 @@
                 <div id="runtimeStatus" class="status">Initializing runtime...</div>
             </div>
             <div class="version-head">PseudoPy - v0</div>
-            <p class="sub">Run .ppy code directly in-browser with parser/runtime errors from PseudoPy.</p>
+            <p class="sub">Run .ppy code directly in-browser with parser/runtime errors from PseudoPy!</p>
         </header>
 
         <div class="workspace">
@@ -421,10 +423,10 @@
                         <input id="uploadInput" type="file" accept=".ppy,text/plain" class="hidden">
                     </div>
                     <div class="example">var x is 2
-state(x)
-when x > 1 do
-    state("x is greater than 1")
-endpt</div>
+                        state(x)
+                        when x > 1 do
+                        state("x is greater than 1")
+                        endpt</div>
                 </article>
 
                 <article class="card">
@@ -446,7 +448,8 @@ endpt</div>
                 <article class="docs-card">
                     <div class="docs-head">
                         <h2>Docs</h2>
-                        <a id="docsExternalLink" class="docs-link" href="#" target="_blank" rel="noopener noreferrer">Open in new tab</a>
+                        <a id="docsExternalLink" class="docs-link" href="#" target="_blank"
+                            rel="noopener noreferrer">Open in new tab</a>
                     </div>
                     <p class="muted">Documentation link loaded below.</p>
                     <div id="docsUrlLabel" class="docs-url"></div>
@@ -467,8 +470,8 @@ endpt</div>
             "ppy_errors.py"
         ];
 
-        const HELLO_WORLD_CODE = `state("Hello World")`;
-        const HELLO_PSEUDOPY_CODE = `state("Hello PsuedoPy")`;
+        const HELLO_WORLD_CODE = `state("Hello World!")`;
+        const HELLO_PSEUDOPY_CODE = `state("Hello PsuedoPy!")`;
         const DOCS_LINK = "./pseudopydoc.pdf";
 
         function pickInitialCode() {
@@ -607,7 +610,7 @@ if "/home/pyodide" not in sys.path:
         async function runCode() {
             const sourceCode = String(codeInput.value ?? "").replace(/\s+$/, "");
             if (!/\S/.test(sourceCode)) {
-                renderResult({ output: "", error: "Please enter PseudoPy code first." });
+                renderResult({ output: "", error: "Please enter PseudoPy code first!" });
                 return;
             }
             executedCodeBox.textContent = sourceCode;
@@ -679,7 +682,7 @@ result_json
         function downloadPpyFile() {
             const sourceCode = String(codeInput.value ?? "");
             if (!/\S/.test(sourceCode)) {
-                renderResult({ output: "", error: "No code to save. Write PseudoPy code first." });
+                renderResult({ output: "", error: "No code to save! Write PseudoPy code first." });
                 return;
             }
             const text = sourceCode.endsWith("\n") ? sourceCode : `${sourceCode}\n`;
@@ -692,14 +695,14 @@ result_json
             link.click();
             link.remove();
             URL.revokeObjectURL(url);
-            setStatus("Saved .ppy file", "ok");
+            setStatus("Saved .ppy file!", "ok");
         }
 
         async function loadPpyFile(file) {
             if (!file) return;
             const name = String(file.name || "");
             if (name && !name.toLowerCase().endsWith(".ppy")) {
-                renderResult({ output: "", error: "Please upload a .ppy file." });
+                renderResult({ output: "", error: "Hey, that is not a .ppy file!" });
                 return;
             }
             const content = await file.text();
@@ -831,4 +834,5 @@ result_json
         });
     </script>
 </body>
+
 </html>
