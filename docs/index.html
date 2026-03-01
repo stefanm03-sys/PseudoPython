@@ -471,6 +471,11 @@ endpt</div>
         const HELLO_PSEUDOPY_CODE = `state("Hello PsuedoPy")`;
         const DOCS_LINK = "./pseudopydoc.pdf";
 
+        function pickInitialCode() {
+            // 1 in 4 chance to show the alternate welcome snippet.
+            return Math.random() < 0.25 ? HELLO_PSEUDOPY_CODE : HELLO_WORLD_CODE;
+        }
+
         let pyodide = null;
         let runtimeReady = false;
 
@@ -827,7 +832,3 @@ result_json
     </script>
 </body>
 </html>
-        function pickInitialCode() {
-            // 1 in 4 chance to show the alternate welcome snippet.
-            return Math.random() < 0.25 ? HELLO_PSEUDOPY_CODE : HELLO_WORLD_CODE;
-        }
