@@ -1,320 +1,472 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PseudoPy Online Interpreter</title>
+    <title>PseudoPy Online Executor</title>
     <style>
+        :root {
+            --bg-0: #0b1418;
+            --bg-1: #112229;
+            --panel: #0f1b22cc;
+            --panel-border: #2a4855;
+            --text: #edf5f8;
+            --muted: #95acb6;
+            --accent: #18c29c;
+            --accent-2: #f4a261;
+            --danger: #ff6b6b;
+            --ok: #70e0a8;
+        }
+
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #000000;
-            background-image: linear-gradient(135deg, #5c5ebf 0%, #667eea 100%);
-            color: #ddd;
             min-height: 100vh;
-            padding: 20px;
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(900px 500px at 10% -15%, #1b7f7f55 0%, transparent 70%),
+                radial-gradient(800px 420px at 110% 20%, #f4a26130 0%, transparent 65%),
+                linear-gradient(160deg, var(--bg-0), var(--bg-1));
+            padding: 24px;
         }
 
-        .container {
-            max-width: 1200px;
+        .shell {
+            max-width: 1240px;
             margin: 0 auto;
-            background: #2e2e2e;
-            background-image: radial-gradient(circle at top left, #6b6b6b, #2e2e2e);
-            border-radius: 10px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+            border-radius: 18px;
+            border: 1px solid #2c4552;
+            background: linear-gradient(180deg, #0f1b22e6, #0d171de6);
+            box-shadow: 0 24px 70px #00000080;
             overflow: hidden;
         }
 
-        .header {
-            background: #3a3a3a;
-            color: #fff;
-            padding: 30px;
-            text-align: center;
+        .hero {
+            padding: 28px 30px 24px;
+            border-bottom: 1px solid #284451;
+            background:
+                linear-gradient(130deg, #133341cc, #0e222ccf),
+                radial-gradient(circle at 15% 35%, #18c29c26, transparent 45%);
         }
 
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+        .title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
         }
 
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
+        h1 {
+            font-size: clamp(1.5rem, 3.5vw, 2.3rem);
+            letter-spacing: 0.01em;
         }
 
-        .content {
+        .sub {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 0.97rem;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 0.86rem;
+            border: 1px solid #3f5f6d;
+            background: #162a3366;
+            color: #d8ebf3;
+        }
+
+        .status::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--accent-2);
+            box-shadow: 0 0 0 6px #f4a26122;
+        }
+
+        .status.ok::before {
+            background: var(--ok);
+            box-shadow: 0 0 0 6px #70e0a833;
+        }
+
+        .status.error::before {
+            background: var(--danger);
+            box-shadow: 0 0 0 6px #ff6b6b33;
+        }
+
+        .grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            padding: 30px;
-            min-height: 500px;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 18px;
+            padding: 22px;
         }
 
-        .section {
+        .card {
+            border: 1px solid var(--panel-border);
+            background: var(--panel);
+            border-radius: 14px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
+            min-height: 470px;
         }
 
-        .section h2 {
-            color: #ddd;
-            margin-bottom: 15px;
-            font-size: 1.3em;
+        .card h2 {
+            font-size: 1.05rem;
+            margin-bottom: 12px;
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
         }
 
         textarea {
+            width: 100%;
             flex: 1;
-            padding: 15px;
-            border: 2px solid #555;
-            border-radius: 5px;
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 14px;
-            resize: none;
-            transition: border-color 0.3s;
-            background: #1e1e1e;
-            color: #ffffff;
+            border: 1px solid #325361;
+            border-radius: 10px;
+            background: #0a1218;
+            color: #eff9fc;
+            padding: 14px;
+            resize: vertical;
+            min-height: 220px;
+            font-family: "Consolas", "Courier New", monospace;
+            line-height: 1.5;
+            font-size: 0.93rem;
         }
 
         textarea:focus {
-            outline: none;
-            border-color: #667eea;
+            outline: 2px solid #18c29c66;
+            border-color: #36c9a8;
         }
 
-        .button-group {
+        .button-row {
+            margin-top: 12px;
             display: flex;
             gap: 10px;
-            margin: 20px 0;
         }
 
         button {
-            flex: 1;
-            padding: 12px 25px;
-            border: dotted 2px #b12a2a;
-            border-radius: 5px;
-            font-size: 1em;
+            border: 1px solid #2f5663;
+            border-radius: 10px;
+            padding: 10px 15px;
+            font-weight: 700;
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
+            color: #e9f7fc;
+            background: #152833;
+            transition: transform 150ms ease, background-color 150ms ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
         }
 
         .run-btn {
-            background: #007acc;
-            color: white;
-        }
-
-        .run-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .run-btn:active {
-            transform: translateY(0);
+            background: linear-gradient(130deg, #18c29c, #139f87);
+            color: #032017;
+            border-color: #21d8af;
         }
 
         .clear-btn {
-            background: #c52424;
-            color: #ddd;
-            border: 1px solid #555;
+            background: linear-gradient(130deg, #e57d46, #d06b3b);
+            color: #2a1306;
+            border-color: #f4a261;
         }
 
-        .clear-btn:hover {
-            background: #e0e0e0;
-        }
-
-        .loading {
-            text-align: center;
-            color: #667eea;
-            font-weight: bold;
-            padding: 20px;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 10px auto;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        #output {
-            background: #000000;
-            background-image: linear-gradient(135deg, #3c355a 0%, #3e56be 100%);
-            border: 1px solid #555;
-            border-radius: 5px;
-            padding: 15px;
-            overflow-y: auto;
-            font-family: 'Consolas', 'Courier New', monospace;
+        .example {
+            margin-top: 14px;
+            background: #0a141bcc;
+            border: 1px solid #2a4450;
+            border-radius: 10px;
+            padding: 12px;
             white-space: pre-wrap;
-            word-wrap: break-word;
-            min-height: 200px;
-            color: #ddd;
+            font-family: "Consolas", "Courier New", monospace;
+            color: #d4e9f1;
+            font-size: 0.85rem;
+        }
+
+        .output-box {
+            background: #091218;
+            border: 1px solid #2a4450;
+            border-radius: 10px;
+            min-height: 110px;
+            padding: 12px;
+            font-family: "Consolas", "Courier New", monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin-bottom: 12px;
+            overflow: auto;
         }
 
         .output-label {
-            color: #ffffff;
-            font-size: 0.9em;
-            margin-bottom: 10px;
+            font-size: 0.83rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .ok {
+            color: var(--ok);
         }
 
         .error {
-            color: #d32f2f;
+            color: var(--danger);
         }
 
-        .success {
-            color: #388e3c;
+        .notice {
+            color: #f5d990;
         }
 
-        @media (max-width: 768px) {
-            .content {
-                grid-template-columns: 1fr;
+        .busy {
+            opacity: 0.75;
+        }
+
+        @media (max-width: 920px) {
+            body {
+                padding: 12px;
             }
 
-            .header h1 {
-                font-size: 1.8em;
+            .grid {
+                grid-template-columns: 1fr;
+                padding: 14px;
+            }
+
+            .card {
+                min-height: 360px;
             }
         }
     </style>
 </head>
-
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🐍 PseudoPy Online</h1>
-            <p>.ppy v0 - Code in PseudoPy on web!</p>
-        </div>
-
-        <div class="content">
-            <div class="section input-section">
-                <h2>Code Editor</h2>
-                <textarea id="codeInput" placeholder="// Enter your PseudoPy code here...\n// Example:
-// state \" Hello World \"\n// var x is 10\n// when x> 5 do\n//     state(x)\n// endpt"></textarea>
-
-                <div class="button-group">
-                    <button class="run-btn" onclick="runCode()">▶ Run Code</button>
-                    <button class="clear-btn" onclick="clearAll()">Clear</button>
-                </div>
-
-                <div class="output-label">PseudoPy Examples:</div>
-                <div
-                    style="background: #1e1e1e; padding: 10px; border: 2px solid #555; border-radius: 5px; font-size: 0.9em; color: #ddd; white-space: pre; font-family: 'Consolas', 'Courier New', monospace;">
-                    var x is 2
-                    state(x)
-                    when x > 1 do
-                    state("x is greater than 1")
-                    endpt
-                </div>
+    <main class="shell">
+        <header class="hero">
+            <div class="title-row">
+                <h1>PseudoPy Web Executor</h1>
+                <div id="runtimeStatus" class="status">Initializing runtime...</div>
             </div>
+            <p class="sub">Run .ppy code directly in-browser with parser/runtime errors from PseudoPy.</p>
+        </header>
 
-            <div class="section output-section">
-                <h2>Output</h2>
-                <div class="output-label">Program output and errors will appear below:</div>
-                <div id="output"></div>
-            </div>
-        </div>
-    </div>
+        <section class="grid">
+            <article class="card">
+                <h2>Editor</h2>
+                <p class="muted">Write PseudoPy and press <code>Ctrl+Enter</code> to run.</p>
+                <textarea id="codeInput" spellcheck="false"></textarea>
+                <div class="button-row">
+                    <button id="runBtn" class="run-btn" type="button">Run PseudoPy</button>
+                    <button id="clearBtn" class="clear-btn" type="button">Clear</button>
+                </div>
+                <div class="example">var x is 2
+state(x)
+when x > 1 do
+    state("x is greater than 1")
+endpt</div>
+            </article>
+
+            <article class="card">
+                <h2>Execution</h2>
+                <p class="muted">Output and error are shown separately so PseudoPy failures are explicit.</p>
+
+                <div class="output-label">Program Output</div>
+                <pre id="programOutput" class="output-box">(no output yet)</pre>
+
+                <div class="output-label">PseudoPy Error</div>
+                <pre id="programError" class="output-box">(no error)</pre>
+            </article>
+        </section>
+    </main>
 
     <script async src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
     <script>
-        let pyodide;
+        const RUNTIME_FILES = [
+            "lexer.py",
+            "parser.py",
+            "interpreter.py",
+            "runtime.py",
+            "ppy_errors.py"
+        ];
 
-        async function initPyodide() {
-            pyodide = await loadPyodide();
-            console.log("Pyodide loaded successfully");
+        const EXAMPLE_CODE = `var x is 2
+state(x)
+when x > 1 do
+    state("x is greater than 1")
+endpt`;
+
+        let pyodide = null;
+        let runtimeReady = false;
+
+        const runtimeStatus = document.getElementById("runtimeStatus");
+        const codeInput = document.getElementById("codeInput");
+        const outputBox = document.getElementById("programOutput");
+        const errorBox = document.getElementById("programError");
+        const runBtn = document.getElementById("runBtn");
+        const clearBtn = document.getElementById("clearBtn");
+
+        function setStatus(message, className = "") {
+            runtimeStatus.textContent = message;
+            runtimeStatus.className = `status ${className}`.trim();
         }
 
-        // set initial input to fixed example
-        function loadExample() {
-            document.getElementById('codeInput').value = 'state("Hello World")';
-        }
-
-        async function runCode() {
-            if (!pyodide) {
-                document.getElementById('output').innerHTML = '<span class="error">Loading Python runtime...</span>';
-                await initPyodide();
+        async function loadRuntimeFiles() {
+            for (const file of RUNTIME_FILES) {
+                const response = await fetch(file, { cache: "no-store" });
+                if (!response.ok) {
+                    throw new Error(`Failed to load ${file} (${response.status})`);
+                }
+                const text = await response.text();
+                pyodide.FS.writeFile(`/home/pyodide/${file}`, text);
             }
+        }
 
-            const code = document.getElementById('codeInput').value;
-            const outputDiv = document.getElementById('output');
-
-            if (!code.trim()) {
-                outputDiv.innerHTML = '<span class="error">Please enter some code first!</span>';
+        async function ensurePyodideReady() {
+            if (runtimeReady) {
                 return;
             }
 
-            outputDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Running PseudoPy code...</div>';
+            setStatus("Loading Pyodide...");
+            pyodide = await loadPyodide();
+
+            setStatus("Installing parser dependency...");
+            await pyodide.loadPackage("micropip");
+            await pyodide.runPythonAsync(`
+import micropip
+try:
+    import lark
+except Exception:
+    await micropip.install("lark")
+`);
+
+            setStatus("Loading PseudoPy runtime...");
+            await loadRuntimeFiles();
+            await pyodide.runPythonAsync(`
+import sys
+if "/home/pyodide" not in sys.path:
+    sys.path.insert(0, "/home/pyodide")
+`);
+
+            runtimeReady = true;
+            setStatus("Runtime ready", "ok");
+        }
+
+        function setBusy(isBusy) {
+            runBtn.disabled = isBusy;
+            runBtn.classList.toggle("busy", isBusy);
+            clearBtn.disabled = isBusy;
+        }
+
+        function renderResult(result) {
+            const outputText = result.output && result.output.trim().length > 0 ? result.output : "(no output)";
+            outputBox.textContent = outputText;
+            outputBox.className = `output-box ${result.error ? "notice" : "ok"}`;
+
+            if (result.error) {
+                errorBox.textContent = result.error;
+                errorBox.className = "output-box error";
+            } else {
+                errorBox.textContent = "(no error)";
+                errorBox.className = "output-box ok";
+            }
+        }
+
+        async function runCode() {
+            const sourceCode = codeInput.value.trimEnd();
+            if (!sourceCode.trim()) {
+                renderResult({ output: "", error: "Please enter PseudoPy code first." });
+                return;
+            }
+
+            setBusy(true);
+            setStatus("Running...");
 
             try {
-                const pythonCode = `
-import sys
+                await ensurePyodideReady();
+                pyodide.globals.set("USER_SOURCE", sourceCode);
+
+                const rawResult = await pyodide.runPythonAsync(`
 import io
-from contextlib import redirect_stdout, redirect_stderr
+import json
+from contextlib import redirect_stdout
+
+from lexer import tokenize
+from parser import parse
+from interpreter import interpret
+from ppy_errors import PseudoPyError, make_error
 
 buf = io.StringIO()
-with redirect_stdout(buf), redirect_stderr(buf):
-    try:
-        from lexer import tokenize
-        from parser import parse
-        from interpreter import interpret
-        pseudopy_code = """${code.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"""
-        tokens = tokenize(pseudopy_code)
+error = None
+
+try:
+    with redirect_stdout(buf):
+        tokens = tokenize(USER_SOURCE)
         ast = parse(tokens)
         interpret(ast)
-    except Exception as e:
-        # fallback to python execution if interpreter fails
-        try:
-            exec("""${code.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}""")
-        except Exception as py_err:
-            print(f"Execution error: {type(py_err).__name__}: {py_err}")
+except PseudoPyError as exc:
+    error = str(exc)
+except Exception as exc:
+    error = str(make_error("PPY-INTERNAL-001", detail=str(exc)))
 
-output = buf.getvalue()
-if not output:
-    output = "(no output)"
-print(output)
-`;
+print(json.dumps({
+    "output": buf.getvalue().rstrip("\\n"),
+    "error": error
+}))
+`);
 
-                const result = await pyodide.runPythonAsync(pythonCode);
-                outputDiv.innerHTML = `<span class="success">${result.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`;
+                const lines = rawResult.trim().split("\n");
+                const payload = lines[lines.length - 1];
+                const result = JSON.parse(payload);
+                renderResult(result);
+                setStatus(result.error ? "Runtime finished with PseudoPy error" : "Runtime ready", result.error ? "" : "ok");
             } catch (error) {
-                outputDiv.innerHTML = `<span class="error">JavaScript Error:\n${error.message}</span>`;
-                console.error('Full error:', error);
+                renderResult({
+                    output: "",
+                    error: `Website runtime error: ${error.message}`
+                });
+                setStatus("Runtime failed to load", "error");
+                console.error(error);
+            } finally {
+                setBusy(false);
             }
         }
 
         function clearAll() {
-            document.getElementById('codeInput').value = '';
-            document.getElementById('output').innerHTML = '';
+            codeInput.value = "";
+            outputBox.textContent = "(no output yet)";
+            outputBox.className = "output-box";
+            errorBox.textContent = "(no error)";
+            errorBox.className = "output-box";
         }
 
-        // Initialize Pyodide and load example when page loads
-        window.addEventListener('load', () => {
-            initPyodide();
-            loadExample();
+        runBtn.addEventListener("click", runCode);
+        clearBtn.addEventListener("click", clearAll);
+
+        codeInput.addEventListener("keydown", (event) => {
+            if (event.ctrlKey && event.key === "Enter") {
+                runCode();
+            }
         });
 
-        // Allow Ctrl+Enter to run code
-        document.getElementById('codeInput').addEventListener('keydown', function (e) {
-            if (e.ctrlKey && e.key === 'Enter') {
-                runCode();
+        window.addEventListener("load", async () => {
+            codeInput.value = EXAMPLE_CODE;
+            try {
+                await ensurePyodideReady();
+            } catch (error) {
+                renderResult({
+                    output: "",
+                    error: `Could not initialize interpreter: ${error.message}`
+                });
+                setStatus("Runtime failed to load", "error");
             }
         });
     </script>
 </body>
-
 </html>
