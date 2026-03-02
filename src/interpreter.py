@@ -207,6 +207,8 @@ def eval_expr(expr: dict, env: Environment):
 
         data_type = data_type_value.strip().lower()
         raw_input = input(prompt_value + " ")
+        if raw_input.strip() == "":
+            return None
 
         if data_type in {"text", "string", "str"}:
             return raw_input
