@@ -12,6 +12,7 @@ require(['vs/editor/editor.main'], function() {
 });
 
 const runBtn = document.getElementById('run-btn');
+const saveBtn = document.getElementById('save-btn');
 const outputEl = document.getElementById('output');
 const configBtn = document.getElementById('config-btn');
 const modal = document.getElementById('config-modal');
@@ -19,6 +20,19 @@ const closeBtn = document.getElementsByClassName('close')[0];
 const grammarInput = document.getElementById('grammar-input');
 const errorList = document.getElementById('error-list');
 const saveConfigBtn = document.getElementById('save-config');
+
+saveBtn.addEventListener('click', () => {
+    const code = editor.getValue();
+    const blob = new Blob([code], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'program.ppy';
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+});
 
 runBtn.addEventListener('click', async () => {
     const code = editor.getValue();
