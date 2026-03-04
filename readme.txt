@@ -3,4 +3,5 @@ Welcome to PseudoPy! Execucute PseudoPy through Microsoft VS Code or execute Pse
 PseudoPy has a digital coding website if you do not have Windows devices.
 PseudoPy supports indentation and braces/brackets for blocks of code.
 
-https://stefanm03-sys.github.io/PseudoPython/index.html
+Web Executor: https://stefanm03-sys.github.io/PseudoPython/index.html
+Language Editor: TBD
