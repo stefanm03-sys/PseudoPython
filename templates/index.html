@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PseudoPython IDE</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>PseudoPython IDE</h1>
+            <div class="actions">
+                <button id="run-btn">Run Code</button>
+                <button id="config-btn">Configure Syntax/Errors</button>
+            </div>
+        </header>
+        <main>
+            <div id="editor-container"></div>
+            <div id="terminal">
+                <div class="terminal-header">Output</div>
+                <pre id="output"></pre>
+            </div>
+        </main>
+    </div>
+
+    <!-- Config Modal -->
+    <div id="config-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Configuration</h2>
+            <div class="config-section">
+                <h3>Grammar (Lark)</h3>
+                <textarea id="grammar-input"></textarea>
+            </div>
+            <div class="config-section">
+                <h3>Error Templates</h3>
+                <div id="error-list"></div>
+            </div>
+            <button id="save-config">Save Configuration</button>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
