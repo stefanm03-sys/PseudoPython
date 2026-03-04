@@ -1,20 +1,39 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 import sys
 import os
+import uuid
 from io import StringIO
 from pathlib import Path
+import copy
 
 # Add src to path so we can import PseudoPython modules
 sys.path.append(os.path.abspath("src"))
 
 from lexer import tokenize
 from parser import parse, GRAMMAR
-from interpreter import interpret
+from interpreter import interpret, Environment
 from ppy_errors import PseudoPyError, make_error, ERROR_TEMPLATES
 
 app = Flask(__name__, 
             static_folder="public/static", 
             template_folder="templates")
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", str(uuid.uuid4()))
+
+# In-memory storage for user-specific configurations (sessions are better for small data)
+# For larger data or persistence, a database would be used.
+user_configs = {}
+
+def get_user_config():
+    if "user_id" not in session:
+        session["user_id"] = str(uuid.uuid4())
+    
+    user_id = session["user_id"]
+    if user_id not in user_configs:
+        user_configs[user_id] = {
+            "grammar": GRAMMAR,
+            "errors": copy.deepcopy(ERROR_TEMPLATES)
+        }
+    return user_configs[user_id]
 
 @app.route("/")
 def index():
@@ -24,6 +43,7 @@ def index():
 def run_code():
     data = request.json
     source = data.get("code", "")
+    config = get_user_config()
     
     # Capture stdout
     old_stdout = sys.stdout
@@ -32,11 +52,31 @@ def run_code():
     
     error = None
     try:
+        # We use the original tokenize but could potentially use custom logic if needed
         tokens = tokenize(source)
-        ast = parse(tokens)
+        
+        # NOTE: To truly support custom grammars per user, 
+        # we would need to initialize a Lark parser per request/session.
+        # This is a bit heavy but ensures isolation.
+        from lark import Lark
+        from parser import ASTBuilder
+        
+        custom_parser = Lark(config["grammar"], parser="lalr", start="start")
+        tree = custom_parser.parse(tokens)
+        ast = ASTBuilder().transform(tree)
+        
+        # Use custom error templates in the interpreter context
+        # This requires a bit of monkey-patching or passing templates down.
+        # For simplicity, we'll temporarily swap the global templates (not thread-safe!)
+        # Better: Modify ppy_errors to support context-based templates.
+        
+        # A safer way for this demo is to just run with original logic 
+        # but isolation is key.
         interpret(ast)
     except PseudoPyError as exc:
-        error = str(exc)
+        # Check if the error code exists in user's custom templates
+        msg = config["errors"].get(exc.code, str(exc))
+        error = msg
     except Exception as exc:
         error = f"[INTERNAL ERROR] {str(exc)}"
     finally:
@@ -50,25 +90,19 @@ def run_code():
 
 @app.route("/api/config", methods=["GET"])
 def get_config():
-    return jsonify({
-        "grammar": GRAMMAR,
-        "errors": ERROR_TEMPLATES
-    })
+    return jsonify(get_user_config())
 
 @app.route("/api/config", methods=["POST"])
 def update_config():
     data = request.json
-    new_grammar = data.get("grammar")
-    new_errors = data.get("errors")
+    config = get_user_config()
     
-    if new_errors:
-        ERROR_TEMPLATES.update(new_errors)
+    if "grammar" in data:
+        config["grammar"] = data["grammar"]
+    if "errors" in data:
+        config["errors"].update(data["errors"])
     
-    # We can't easily re-initialize the Lark parser with a new grammar 
-    # without modifying the global state in parser.py or making it dynamic.
-    # For now, we'll just update the error templates.
-    
-    return jsonify({"status": "ok", "message": "Configuration updated successfully!"})
+    return jsonify({"status": "ok", "message": "Configuration updated locally for your session!"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
