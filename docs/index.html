@@ -584,7 +584,7 @@
     <script>
         CodeMirror.defineSimpleMode("pseudopy", {
             start: [
-                { regex: /(?:var|is|when|butIf|else|do|repeat|amt|endpt|stop|restart|ask|execute|wait|function)\b/, token: "keyword" },
+                { regex: /(?:var|is|when|butIf|else|otherwise|do|repeat|amt|endpt|stop|restart|ask|execute|wait|function)\b/, token: "keyword" },
                 { regex: /(?:state|stateStr|stateInt|stateFloat|stateBool)\b/, token: "def" },
                 { regex: /(?:true|false|none|ignore|TRUE|FALSE)\b/, token: "atom" },
                 { regex: /(?:and|or)\b/, token: "keyword" },
@@ -796,7 +796,7 @@ if "/home/pyodide" not in sys.path:
             if (!trimmed) return false;
             if (/^when\b.*\bdo$/i.test(trimmed)) return true;
             if (/^butIf\b.*\bdo$/i.test(trimmed)) return true;
-            if (/^else\b$/i.test(trimmed)) return true;
+            if (/^(else|otherwise)\b$/i.test(trimmed)) return true;
             if (/^repeat\s+when\b.*\bdo$/i.test(trimmed)) return true;
             if (/^repeat\s+amt\s*\(.*\)\s*$/i.test(trimmed)) return true;
             if (/^function\b/i.test(trimmed) && !/\{\s*$/.test(trimmed)) return true;

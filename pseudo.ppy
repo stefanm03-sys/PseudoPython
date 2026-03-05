@@ -4,6 +4,6 @@ var x is 2
 state(x)
 
 var y is 0
-when x > 1 do
+when x > 1 {
     state("x is greater than 1")
-endpt
+}
