@@ -3,6 +3,7 @@ modules = ["python-3.11"]
 
 [nix]
 channel = "stable-25_05"
+packages = ["gh"]
 
 [unitTest]
 language = "python3"
@@ -43,7 +44,7 @@ localPort = 1104
 externalPort = 3000
 
 [[ports]]
-localPort = 3000
+localPort = 5000
 externalPort = 80
 
 [[ports]]
