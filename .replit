@@ -1,4 +1,4 @@
-entrypoint = "main.py"
+entrypoint = "app.py"
 modules = ["nodejs-20", "python-3.11"]
 
 [nix]
@@ -12,9 +12,8 @@ language = "python3"
 requiredFiles = [".replit", "replit.nix"]
 
 [deployment]
-run = ["python3", "main.py"]
+run = ["python3", "app.py"]
 deploymentTarget = "cloudrun"
-publicDir = "public"
 
 [agent]
 expertMode = true
@@ -42,6 +41,11 @@ args = "python3 app.py"
 [[ports]]
 localPort = 1104
 externalPort = 3000
+
+[[ports]]
+localPort = 1455
+externalPort = 3002
+exposeLocalhost = true
 
 [[ports]]
 localPort = 3000

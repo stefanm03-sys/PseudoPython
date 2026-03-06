@@ -37,7 +37,15 @@ def get_user_config():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    try:
+        return render_template("index.html")
+    except Exception:
+        # Keep root healthy for platforms that probe "/" and not "/health".
+        return jsonify({"status": "ok"}), 200
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok"}), 200
 
 @app.route("/api/run", methods=["POST"])
 def run_code():
@@ -105,5 +113,6 @@ def update_config():
     return jsonify({"status": "ok", "message": "Configuration updated locally for your session!"})
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    port = int(os.environ.get("PORT", 8080))
+    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
+    app.run(host="0.0.0.0", port=port, debug=debug)
