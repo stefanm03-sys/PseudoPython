@@ -95,6 +95,9 @@
 
         <section class="guide-section">
             <h2>1.0 - The Basics</h2>
+            <p class="muted">Use this page from top to bottom. Each step builds on the previous one while keeping the
+                original guide explanations.</p>
+
             <div class="guide-subsection">
                 <strong>1.1 - Comments</strong>
                 <p class="muted">Comments write out your thoughts and are ignored by the program. You can write them on
@@ -115,6 +118,7 @@ This is also a multi line comment in Pseudopy!
 It ends when you put another // on a new line.
 //</code></pre>
             </div>
+
             <div class="guide-subsection">
                 <strong>1.2 - Data Types</strong>
                 <p class="muted">Data types are unique, but consistent in languages. The four common ones are
@@ -125,8 +129,9 @@ It ends when you put another // on a new line.
 3.14
 true</code></pre>
             </div>
+
             <div class="guide-subsection">
-                <strong>1.3 - Syntax</strong>
+                <strong>1.3 - Syntax Basics</strong>
                 <p class="muted">PseudoPy aims for readable syntax and easy coding. Example patterns:</p>
                 <pre><code># This is a comment!
 
@@ -141,7 +146,7 @@ repeat amt(2) # This is code using indentation with an endpt.
     state("Hello!")
 endpt
 
-repeat when x == 10 do { # This is code using braces and no endpt. 
+repeat when x == 10 do { # This is code using braces and no endpt.
     state(x)
 }
 
@@ -151,16 +156,20 @@ when 1 > 0 or 2 > 3 do # The or operator evaluates to true if either side is tru
     state("true branch")
 endpt</code></pre>
             </div>
+
             <div class="guide-subsection">
                 <strong>1.4 - Variables and Assignment</strong>
                 <p class="muted"><em>Variables</em> in PseudoPy are created using <code>var</code> and <code>is</code>.
                     Declare with <code>var</code>, then assign a value using <code>is</code>. They can be called by name
-                    later in the program, and can generally be reassigned to new values.
-                </p>
+                    later in the program, and can generally be reassigned to new values.</p>
                 <pre><code>var x is 10 # Creates a variable called x and assigns it the value of 10, which is an integer.
 var name is "Alice" # Creates a variable called name and assigns it the value of "Alice", which is a string.
 var sum is 5 + x # Creates a variable called sum and assigns it the value of 5 + x, which is 15.
 state(sum) # Prints the variable sum, which is 15.</code></pre>
+            </div>
+
+            <div class="guide-subsection">
+                <strong>1.5 - Functions</strong>
                 <p class="muted">Functions are also creatable using <code>function</code> and closed with
                     <code>endpt</code>. Using this creates a shiny new function that can be customized to your needs.
                 </p>
