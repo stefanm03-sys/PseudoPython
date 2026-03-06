@@ -327,21 +327,71 @@
             margin-bottom: 6px;
         }
 
-        .console-input-row {
+        .output-console {
             display: flex;
-            gap: 8px;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 150px;
+        }
+
+        .output-stream {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .inline-input-row {
+            border-top: 1px solid #2a4450;
+            padding-top: 8px;
+            display: grid;
+            gap: 5px;
+        }
+
+        .inline-input-hint {
+            display: inline-flex;
             align-items: center;
-            margin-top: 8px;
+            gap: 8px;
+            color: #b9d5e1;
+            font-size: 0.78rem;
+            letter-spacing: 0.01em;
+        }
+
+        .inline-input-pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            background: #ffffff;
+            animation: inputPulse 1s steps(1, end) infinite;
+        }
+
+        @keyframes inputPulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
 
         .console-input {
-            flex: 1 1 auto;
+            width: 100%;
             border: 1px solid #2a4450;
             border-radius: 8px;
-            background: #091218;
+            background: #0a151c;
             color: #dfeef5;
             padding: 8px 10px;
             font-family: "Consolas", "Courier New", monospace;
+            caret-color: #ffffff;
+        }
+
+        .console-input::placeholder {
+            color: #8fb1bf;
+            opacity: 0.9;
         }
 
         .console-input:focus {
@@ -553,10 +603,12 @@
                     <pre id="executedCode" class="output-box">(nothing executed yet. type out sommething!)</pre>
 
                     <div class="output-label">Program Output</div>
-                    <pre id="programOutput" class="output-box">(no output yet. any code?)</pre>
-                    <div class="console-input-row">
-                        <input id="consoleInput" class="console-input" type="text"
-                            placeholder="Input for ask(...) (if empty, popup will open)">
+                    <div id="programOutputPanel" class="output-box output-console">
+                        <pre id="programOutput" class="output-stream">(no output yet. any code?)</pre>
+                        <div class="inline-input-row">
+                            <div class="inline-input-hint"><span class="inline-input-pulse"></span>Type input here..</div>
+                            <input id="consoleInput" class="console-input" type="text" placeholder="Type input here..">
+                        </div>
                     </div>
 
                     <div class="output-label">PseudoPy Error</div>
@@ -657,6 +709,7 @@ stateBool(true)`;
         const runtimeStatus = document.getElementById("runtimeStatus");
         const codeInput = document.getElementById("codeInput");
         const executedCodeBox = document.getElementById("executedCode");
+        const outputPanel = document.getElementById("programOutputPanel");
         const outputBox = document.getElementById("programOutput");
         const errorBox = document.getElementById("programError");
         const runBtn = document.getElementById("runBtn");
@@ -782,10 +835,13 @@ if "/home/pyodide" not in sys.path:
 `);
 
             // ask(...) input bridge:
-            // 1) use Console Input field when user pre-typed value
-            // 2) fallback to browser popup prompt
+            // use the inline input box in Program Output before running.
             pyodide.globals.set("JS_INPUT_BRIDGE", (promptText) => {
                 try {
+                    if (consoleInput) {
+                        consoleInput.placeholder = "Type input here..";
+                        consoleInput.setAttribute("aria-label", String(promptText ?? "PseudoPy input"));
+                    }
                     const typed = consoleInput && typeof consoleInput.value === "string"
                         ? consoleInput.value
                         : "";
@@ -794,10 +850,9 @@ if "/home/pyodide" not in sys.path:
                         return typed;
                     }
                 } catch (error) {
-                    // ignore and fallback to popup
+                    // ignore and return empty input
                 }
-                const fallback = window.prompt(String(promptText ?? ""));
-                return fallback === null ? "" : String(fallback);
+                return "";
             });
             await pyodide.runPythonAsync(`
 import builtins
@@ -822,7 +877,7 @@ builtins.input = _ppy_input
             const outputValue = typeof result?.output === "string" ? result.output : "";
             const outputText = /\S/.test(outputValue) ? outputValue : "(no output)";
             outputBox.textContent = outputText;
-            outputBox.className = `output-box ${result.error ? "notice" : "ok"}`;
+            outputPanel.className = `output-box output-console ${result.error ? "notice" : "ok"}`;
 
             if (result.error) {
                 errorBox.textContent = result.error;
@@ -930,7 +985,7 @@ result_json
             executedCodeBox.textContent = "(nothing executed yet)";
             executedCodeBox.className = "output-box";
             outputBox.textContent = "(no output yet)";
-            outputBox.className = "output-box";
+            outputPanel.className = "output-box output-console";
             errorBox.textContent = "(no error)";
             errorBox.className = "output-box";
             if (consoleInput) {

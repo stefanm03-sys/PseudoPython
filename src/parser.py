@@ -299,7 +299,10 @@ class ASTBuilder(Transformer):
         }
 
     def call_stmt(self, name, args):
-        return {"type": "call_stmt", "name": str(name), "args": args}
+        name_str = str(name)
+        if name_str == "ask":
+            return {"type": "ask_stmt", "args": args}
+        return {"type": "call_stmt", "name": name_str, "args": args}
 
     def if_stmt(self, cond, then_block, *rest):
         elifs = []

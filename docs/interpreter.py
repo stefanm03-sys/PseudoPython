@@ -46,6 +46,50 @@ def _ensure_finite_number(value, op: str):
     return value
 
 
+def _eval_ask(expr: dict, env: Environment):
+    prompt_value = eval_expr(expr["prompt"], env)
+    if not isinstance(prompt_value, str):
+        raise make_error("PPY-TYPE-004")
+
+    # Allow ask("...", int) with bare identifiers, or ask("...", "int") as a string.
+    data_type_expr = expr.get("data_type")
+    if data_type_expr is None:
+        data_type_value = "text"
+    elif isinstance(data_type_expr, dict) and data_type_expr.get("type") == "var":
+        data_type_value = data_type_expr["name"]
+    else:
+        data_type_value = eval_expr(data_type_expr, env)
+        if not isinstance(data_type_value, str):
+            raise make_error("PPY-TYPE-005")
+
+    data_type = data_type_value.strip().lower()
+    raw_input = input(prompt_value + " ")
+    if raw_input.strip() == "":
+        return None
+
+    if data_type in {"text", "string", "str"}:
+        return raw_input
+    if data_type in {"int", "integer"}:
+        try:
+            return int(raw_input)
+        except ValueError as exc:
+            raise make_error("PPY-INPUT-001") from exc
+    if data_type in {"float", "number", "decimal"}:
+        try:
+            return float(raw_input)
+        except ValueError as exc:
+            raise make_error("PPY-INPUT-002") from exc
+    if data_type in {"bool", "boolean"}:
+        normalized = raw_input.strip().lower()
+        if normalized in {"true", "t", "yes", "y", "1"}:
+            return True
+        if normalized in {"false", "f", "no", "n", "0"}:
+            return False
+        raise make_error("PPY-INPUT-003")
+
+    raise make_error("PPY-INPUT-004", data_type=data_type_value)
+
+
 def _invoke_function(name: str, arg_exprs: list, env: Environment, loop_depth: int):
     func_value = env.get(name)
     if not isinstance(func_value, _UserFunction):
@@ -112,6 +156,29 @@ def execute_stmt(stmt: dict, env: Environment, loop_depth: int = 0):
         env.define(stmt["name"], func)
     elif t == "call_stmt":
         _invoke_function(stmt["name"], stmt.get("args", []), env, loop_depth)
+    elif t == "ask_stmt":
+        args = stmt.get("args", [])
+        if len(args) == 0:
+            ask_expr = {
+                "type": "ask",
+                "prompt": {"type": "string", "value": ""},
+                "data_type": None,
+            }
+        elif len(args) == 1:
+            ask_expr = {
+                "type": "ask",
+                "prompt": args[0],
+                "data_type": None,
+            }
+        elif len(args) == 2:
+            ask_expr = {
+                "type": "ask",
+                "prompt": args[0],
+                "data_type": args[1],
+            }
+        else:
+            raise make_error("PPY-FUNC-003", name="ask", expected=2, actual=len(args))
+        _eval_ask(ask_expr, env)
     elif t == "stop":
         if loop_depth <= 0:
             raise make_error("PPY-RUNTIME-006")
@@ -207,47 +274,7 @@ def eval_expr(expr: dict, env: Environment):
     if t == "var":
         return env.get(expr["name"])
     if t == "ask":
-        prompt_value = eval_expr(expr["prompt"], env)
-        if not isinstance(prompt_value, str):
-            raise make_error("PPY-TYPE-004")
-
-        # Allow ask("...", int) with bare identifiers, or ask("...", "int") as a string.
-        data_type_expr = expr.get("data_type")
-        if data_type_expr is None:
-            data_type_value = "text"
-        elif isinstance(data_type_expr, dict) and data_type_expr.get("type") == "var":
-            data_type_value = data_type_expr["name"]
-        else:
-            data_type_value = eval_expr(data_type_expr, env)
-            if not isinstance(data_type_value, str):
-                raise make_error("PPY-TYPE-005")
-
-        data_type = data_type_value.strip().lower()
-        raw_input = input(prompt_value + " ")
-        if raw_input.strip() == "":
-            return None
-
-        if data_type in {"text", "string", "str"}:
-            return raw_input
-        if data_type in {"int", "integer"}:
-            try:
-                return int(raw_input)
-            except ValueError as exc:
-                raise make_error("PPY-INPUT-001") from exc
-        if data_type in {"float", "number", "decimal"}:
-            try:
-                return float(raw_input)
-            except ValueError as exc:
-                raise make_error("PPY-INPUT-002") from exc
-        if data_type in {"bool", "boolean"}:
-            normalized = raw_input.strip().lower()
-            if normalized in {"true", "t", "yes", "y", "1"}:
-                return True
-            if normalized in {"false", "f", "no", "n", "0"}:
-                return False
-            raise make_error("PPY-INPUT-003")
-
-        raise make_error("PPY-INPUT-004", data_type=data_type_value)
+        return _eval_ask(expr, env)
     if t == "neg":
         v = eval_expr(expr["value"], env)
         ensure_number(v, "-")
