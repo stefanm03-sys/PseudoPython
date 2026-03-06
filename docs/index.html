@@ -340,11 +340,16 @@
             word-break: break-word;
         }
 
-        .inline-input-row {
+        .ask-indicator {
             border-top: 1px solid #2a4450;
             padding-top: 8px;
-            display: grid;
-            gap: 5px;
+            display: none;
+        }
+
+        .ask-indicator.active {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .inline-input-hint {
@@ -354,6 +359,7 @@
             color: #b9d5e1;
             font-size: 0.78rem;
             letter-spacing: 0.01em;
+            white-space: nowrap;
         }
 
         .inline-input-pulse {
@@ -376,27 +382,6 @@
             100% {
                 opacity: 1;
             }
-        }
-
-        .console-input {
-            width: 100%;
-            border: 1px solid #2a4450;
-            border-radius: 8px;
-            background: #0a151c;
-            color: #dfeef5;
-            padding: 8px 10px;
-            font-family: "Consolas", "Courier New", monospace;
-            caret-color: #ffffff;
-        }
-
-        .console-input::placeholder {
-            color: #8fb1bf;
-            opacity: 0.9;
-        }
-
-        .console-input:focus {
-            outline: 2px solid #18c29c66;
-            border-color: #36c9a8;
         }
 
         .ok {
@@ -597,17 +582,17 @@
 
                 <article class="card">
                     <h2>Execution</h2>
-                    <p class="muted">Output and error are shown separately so PseudoPy failures are explicit.</p>
+                    <p class="muted">Output and error are shown separately so PseudoPy can be better read.</p>
 
-                    <div class="output-label">Executed PseudoPy Code!</div>
-                    <pre id="executedCode" class="output-box">(nothing executed yet. type out sommething!)</pre>
+                    <div class="output-label">Execute PseudoPy Code!</div>
+                    <pre id="executedCode" class="output-box">(nothing executed yet. type out something!)</pre>
 
                     <div class="output-label">Program Output</div>
                     <div id="programOutputPanel" class="output-box output-console">
                         <pre id="programOutput" class="output-stream">(no output yet. any code?)</pre>
-                        <div class="inline-input-row">
-                            <div class="inline-input-hint"><span class="inline-input-pulse"></span>Type input here..</div>
-                            <input id="consoleInput" class="console-input" type="text" placeholder="Type input here..">
+                        <div id="askIndicator" class="ask-indicator" aria-live="polite">
+                            <div class="inline-input-hint"><span class="inline-input-pulse"></span><span
+                                    id="askHintText">Type input here..</span></div>
                         </div>
                     </div>
 
@@ -626,7 +611,7 @@
                     <p class="muted">Documentation link loaded below.</p>
                     <div id="docsUrlLabel" class="docs-url"></div>
                     <iframe id="docsFrame" class="docs-frame" title="PseudoPy documentation" loading="lazy"></iframe>
-                    <p class="muted">If embedded docs are blocked by the site, use "Open in new tab".</p>
+                    <p class="muted">If embedded docs are blocked by the site, press "Open in new tab".</p>
                 </article>
             </section>
 
@@ -688,7 +673,7 @@
         const HELLO_WORLD_CODE = `state("Hello World!")`;
         const HELLO_PSEUDOPY_CODE = `state("Hello PsuedoPy!")`;
         const EXAMPLE_SNIPPET = `var x is 2
-when x > 1, do
+when x > 1 do
     stateStr("x is greater than 1")
 endpt
 do x + 1
@@ -717,7 +702,8 @@ stateBool(true)`;
         const downloadBtn = document.getElementById("downloadBtn");
         const uploadBtn = document.getElementById("uploadBtn");
         const uploadInput = document.getElementById("uploadInput");
-        const consoleInput = document.getElementById("consoleInput");
+        const askIndicator = document.getElementById("askIndicator");
+        const askHintText = document.getElementById("askHintText");
         const navCoding = document.getElementById("navCoding");
         const navDocs = document.getElementById("navDocs");
         const navGuides = document.getElementById("navGuides");
@@ -835,24 +821,26 @@ if "/home/pyodide" not in sys.path:
 `);
 
             // ask(...) input bridge:
-            // use the inline input box in Program Output before running.
+            // block with popup prompt immediately.
             pyodide.globals.set("JS_INPUT_BRIDGE", (promptText) => {
+                showAskIndicator(promptText);
+                outputBox.textContent = "Waiting...";
+                outputPanel.className = "output-box output-console notice";
                 try {
-                    if (consoleInput) {
-                        consoleInput.placeholder = "Type input here..";
-                        consoleInput.setAttribute("aria-label", String(promptText ?? "PseudoPy input"));
+                    const promptFn = (window.top && typeof window.top.prompt === "function")
+                        ? window.top.prompt.bind(window.top)
+                        : (typeof window.prompt === "function" ? window.prompt.bind(window) : null);
+                    if (!promptFn) {
+                        hideAskIndicator();
+                        return "";
                     }
-                    const typed = consoleInput && typeof consoleInput.value === "string"
-                        ? consoleInput.value
-                        : "";
-                    if (typed.trim() !== "") {
-                        consoleInput.value = "";
-                        return typed;
-                    }
+                    const fallback = promptFn(String(promptText ?? ""));
+                    hideAskIndicator();
+                    return fallback === null ? "" : String(fallback);
                 } catch (error) {
-                    // ignore and return empty input
+                    hideAskIndicator();
+                    return "";
                 }
-                return "";
             });
             await pyodide.runPythonAsync(`
 import builtins
@@ -871,6 +859,19 @@ builtins.input = _ppy_input
             runBtn.disabled = isBusy;
             runBtn.classList.toggle("busy", isBusy);
             clearBtn.disabled = isBusy;
+        }
+
+        function showAskIndicator(promptText) {
+            if (!askIndicator || !askHintText) return;
+            const prompt = String(promptText ?? "").trim();
+            askHintText.textContent = prompt ? `${prompt}` : "Type input here..";
+            askIndicator.classList.add("active");
+        }
+
+        function hideAskIndicator() {
+            if (!askIndicator || !askHintText) return;
+            askHintText.textContent = "Type input here..";
+            askIndicator.classList.remove("active");
         }
 
         function renderResult(result) {
@@ -988,9 +989,7 @@ result_json
             outputPanel.className = "output-box output-console";
             errorBox.textContent = "(no error)";
             errorBox.className = "output-box";
-            if (consoleInput) {
-                consoleInput.value = "";
-            }
+            hideAskIndicator();
         }
 
         async function downloadPpyFile() {
