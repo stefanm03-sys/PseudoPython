@@ -27,8 +27,20 @@ class _UserFunction:
     closure: Environment
 
 
+def _is_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def _to_ppy_text(value):
+    if value is None:
+        return "none"
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return str(value)
+
+
 def _ensure_finite_number(value, op: str):
-    if isinstance(value, (int, float)):
+    if _is_number(value):
         if not math.isfinite(float(value)):
             raise make_error("PPY-MATH-002", op=op, value=value)
     return value
@@ -151,6 +163,11 @@ def execute_stmt(stmt: dict, env: Environment, loop_depth: int = 0):
 
     elif t == "repeat_amt":
         n = eval_expr(stmt["count"], env)
+        if isinstance(n, float):
+            if n.is_integer():
+                n = int(n)
+            else:
+                raise make_error("PPY-TYPE-003", actual_type=type(n).__name__)
         if not isinstance(n, int):
             raise make_error("PPY-TYPE-003", actual_type=type(n).__name__)
         if n < 0:
@@ -241,13 +258,32 @@ def eval_expr(expr: dict, env: Environment):
         right = eval_expr(expr["right"], env)
 
         if t == "add":
-            return left + right
+            if _is_number(left) and _is_number(right):
+                return _ensure_finite_number(left + right, "+")
+            if isinstance(left, str) or isinstance(right, str):
+                return _to_ppy_text(left) + _to_ppy_text(right)
+            raise make_error(
+                "PPY-TYPE-008",
+                op="+",
+                left_type=type(left).__name__,
+                right_type=type(right).__name__,
+            )
         if t == "sub":
             ensure_number(left, "-"); ensure_number(right, "-")
             return _ensure_finite_number(left - right, "-")
         if t == "mul":
-            ensure_number(left, "*"); ensure_number(right, "*")
-            return _ensure_finite_number(left * right, "*")
+            if _is_number(left) and _is_number(right):
+                return _ensure_finite_number(left * right, "*")
+            if isinstance(left, str) and isinstance(right, int):
+                return left * right
+            if isinstance(left, int) and isinstance(right, str):
+                return left * right
+            raise make_error(
+                "PPY-TYPE-008",
+                op="*",
+                left_type=type(left).__name__,
+                right_type=type(right).__name__,
+            )
         if t == "div":
             ensure_number(left, "/"); ensure_number(right, "/")
             if right == 0:
@@ -258,17 +294,45 @@ def eval_expr(expr: dict, env: Environment):
         if t == "ne":
             return left != right
         if t == "gt":
-            return left > right
+            if (_is_number(left) and _is_number(right)) or (isinstance(left, str) and isinstance(right, str)):
+                return left > right
+            raise make_error(
+                "PPY-TYPE-009",
+                op=">",
+                left_type=type(left).__name__,
+                right_type=type(right).__name__,
+            )
         if t == "lt":
-            return left < right
+            if (_is_number(left) and _is_number(right)) or (isinstance(left, str) and isinstance(right, str)):
+                return left < right
+            raise make_error(
+                "PPY-TYPE-009",
+                op="<",
+                left_type=type(left).__name__,
+                right_type=type(right).__name__,
+            )
         if t == "ge":
-            return left >= right
+            if (_is_number(left) and _is_number(right)) or (isinstance(left, str) and isinstance(right, str)):
+                return left >= right
+            raise make_error(
+                "PPY-TYPE-009",
+                op=">=",
+                left_type=type(left).__name__,
+                right_type=type(right).__name__,
+            )
         if t == "le":
-            return left <= right
+            if (_is_number(left) and _is_number(right)) or (isinstance(left, str) and isinstance(right, str)):
+                return left <= right
+            raise make_error(
+                "PPY-TYPE-009",
+                op="<=",
+                left_type=type(left).__name__,
+                right_type=type(right).__name__,
+            )
         if t == "and":
-            return truthy(left) and truthy(right)
+            return right if truthy(left) else left
         if t == "or":
-            return truthy(left) or truthy(right)
+            return left if truthy(left) else right
 
     raise make_error("PPY-RUNTIME-005", expr_type=t)
 

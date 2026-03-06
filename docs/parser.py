@@ -230,6 +230,10 @@ def _collect_validation_errors(source: str):
 
     return errors
 
+
+def _format_multi_issue_message(issues):
+    return "\n".join(f"{idx}. {msg}" for idx, msg in enumerate(issues, start=1))
+
 @v_args(inline=True)
 class ASTBuilder(Transformer):
     def stop_stmt(self):
@@ -385,7 +389,11 @@ def parse(source: str):
         tree = _parser.parse(source)
         ast = ASTBuilder().transform(tree)
         if precheck_errors:
-            raise make_error("PPY-PARSE-002", detail="\n".join(precheck_errors))
+            raise make_error(
+                "PPY-PARSE-002",
+                count=len(precheck_errors),
+                detail=_format_multi_issue_message(precheck_errors),
+            )
         return ast
     except UnexpectedInput as exc:
         detail = str(exc).splitlines()[0] if str(exc) else "Invalid syntax"
@@ -395,4 +403,8 @@ def parse(source: str):
         all_errors.append(
             f"Line {line}, column {column}: [PPY-PARSE-001] {detail}"
         )
-        raise make_error("PPY-PARSE-002", detail="\n".join(all_errors)) from exc
+        raise make_error(
+            "PPY-PARSE-002",
+            count=len(all_errors),
+            detail=_format_multi_issue_message(all_errors),
+        ) from exc
