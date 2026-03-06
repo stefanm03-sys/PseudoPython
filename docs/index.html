@@ -327,6 +327,28 @@
             margin-bottom: 6px;
         }
 
+        .console-input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .console-input {
+            flex: 1 1 auto;
+            border: 1px solid #2a4450;
+            border-radius: 8px;
+            background: #091218;
+            color: #dfeef5;
+            padding: 8px 10px;
+            font-family: "Consolas", "Courier New", monospace;
+        }
+
+        .console-input:focus {
+            outline: 2px solid #18c29c66;
+            border-color: #36c9a8;
+        }
+
         .ok {
             color: var(--ok);
         }
@@ -493,6 +515,8 @@
                 <ul class="tiny-notice-list">
                     <li><code>otherwise</code> can now be used in place of <code>else</code></li>
                     <li>Multiple errors can be returned on numerous lines</li>
+                    <li>Better errors, possibly</li>
+                    <li>QOL improvements</li>
                 </ul>
             </section>
         </header>
@@ -533,6 +557,12 @@
 
                     <div class="output-label">PseudoPy Error</div>
                     <pre id="programError" class="output-box">(no errors! all clear.)</pre>
+
+                    <div class="output-label">Console Input (for ask(...))</div>
+                    <div class="console-input-row">
+                        <input id="consoleInput" class="console-input" type="text"
+                            placeholder="Type input here for ask(...), then Run">
+                    </div>
                 </article>
             </section>
 
@@ -636,6 +666,7 @@ stateBool(true)`;
         const downloadBtn = document.getElementById("downloadBtn");
         const uploadBtn = document.getElementById("uploadBtn");
         const uploadInput = document.getElementById("uploadInput");
+        const consoleInput = document.getElementById("consoleInput");
         const navCoding = document.getElementById("navCoding");
         const navDocs = document.getElementById("navDocs");
         const navGuides = document.getElementById("navGuides");
@@ -750,6 +781,33 @@ except Exception:
 import sys
 if "/home/pyodide" not in sys.path:
     sys.path.insert(0, "/home/pyodide")
+`);
+
+            // ask(...) input bridge:
+            // 1) use Console Input field when user pre-typed value
+            // 2) fallback to browser popup prompt
+            pyodide.globals.set("JS_INPUT_BRIDGE", (promptText) => {
+                try {
+                    const typed = consoleInput && typeof consoleInput.value === "string"
+                        ? consoleInput.value
+                        : "";
+                    if (typed.trim() !== "") {
+                        consoleInput.value = "";
+                        return typed;
+                    }
+                } catch (error) {
+                    // ignore and fallback to popup
+                }
+                const fallback = window.prompt(String(promptText ?? ""));
+                return fallback === null ? "" : String(fallback);
+            });
+            await pyodide.runPythonAsync(`
+import builtins
+
+def _ppy_input(prompt=""):
+    return JS_INPUT_BRIDGE(str(prompt))
+
+builtins.input = _ppy_input
 `);
 
             runtimeReady = true;
@@ -877,6 +935,9 @@ result_json
             outputBox.className = "output-box";
             errorBox.textContent = "(no error)";
             errorBox.className = "output-box";
+            if (consoleInput) {
+                consoleInput.value = "";
+            }
         }
 
         async function downloadPpyFile() {
