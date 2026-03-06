@@ -93,12 +93,13 @@ repeat_amt_stmt: "repeat" "amt" "(" expr ")" program "endpt"         -> repeat_a
      | "true"                        -> true
      | "false"                       -> false
      | "none"                        -> none_lit
-     | "ignore"                      -> none_lit
+     | "blank"                      -> none_lit
      | ask_expr
      | NAME                          -> var
      | "(" expr ")"
 
 ask_expr: "ask" "(" expr ("," expr)? ")" -> ask_expr
+        | "ask" "(" ")"                   -> ask_expr_empty
 param_list_opt: param_list |              -> empty_params
 arg_list_opt: arg_list |                  -> empty_args
 param_list: NAME ("," NAME)*
@@ -364,6 +365,13 @@ class ASTBuilder(Transformer):
 
     def ask_expr(self, prompt, data_type=None):
         return {"type": "ask", "prompt": prompt, "data_type": data_type}
+
+    def ask_expr_empty(self):
+        return {
+            "type": "ask",
+            "prompt": {"type": "string", "value": ""},
+            "data_type": None,
+        }
 
     def neg(self, x): return {"type": "neg", "value": x}
     def add(self, a, b): return {"type": "add", "left": a, "right": b}

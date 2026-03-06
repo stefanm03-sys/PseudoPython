@@ -215,7 +215,7 @@ def eval_expr(expr: dict, env: Environment):
         data_type_expr = expr.get("data_type")
         if data_type_expr is None:
             data_type_value = "text"
-        elif data_type_expr.get("type") == "var":
+        elif isinstance(data_type_expr, dict) and data_type_expr.get("type") == "var":
             data_type_value = data_type_expr["name"]
         else:
             data_type_value = eval_expr(data_type_expr, env)
