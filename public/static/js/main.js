@@ -48,7 +48,10 @@ runBtn.addEventListener('click', async () => {
         
         outputEl.textContent = data.output;
         if (data.error) {
-            outputEl.innerHTML += `<div class="error">\n${data.error}</div>`;
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = data.error;
+            outputEl.appendChild(errorDiv);
         }
     } catch (err) {
         outputEl.textContent = 'Error connecting to server: ' + err.message;
