@@ -12,12 +12,9 @@
             --border: #2a4855;
             --text: #edf5f8;
             --muted: #95acb6;
-            --accent: #18c29c;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
@@ -37,45 +34,31 @@
             padding: 18px;
         }
 
-        h1 {
-            margin: 0 0 6px;
-        }
+        h1 { margin: 0 0 6px; }
+        .muted { color: var(--muted); margin: 0 0 14px; }
+        h2 { margin-top: 20px; }
+        ul { margin: 8px 0 0 20px; }
+        li { margin-bottom: 6px; }
 
-        .muted {
-            color: var(--muted);
-            margin: 0 0 16px;
-        }
-
-        a {
-            color: #9cd4ff;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
+        a { color: #9cd4ff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
 
         .item {
-            padding: 12px;
+            padding: 10px;
             border: 1px solid var(--border);
-            border-radius: 10px;
-            margin-bottom: 10px;
-            background: #0d1a21;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: #0f1b22;
         }
 
         .badge {
             display: inline-block;
-            background: #18c29c22;
-            border: 1px solid #18c29c66;
-            color: #aef1df;
-            padding: 2px 8px;
-            border-radius: 999px;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 1px 6px;
+            border-radius: 8px;
             font-size: 12px;
-            margin-right: 8px;
-        }
-
-        .top-links {
-            margin-top: 12px;
+            margin-right: 6px;
         }
     </style>
 </head>
