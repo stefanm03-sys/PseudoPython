@@ -6,6 +6,7 @@ ERROR_TEMPLATES = {
     "PPY-IO-404": "[PPY-IO-404] File not found! Could be invalid: {path}",
     "PPY-IO-002": "[PPY-IO-002] Input file must end with .ppy! May be invalid: {path}",
     "PPY-PARSE-001": "[PPY-PARSE-001] Syntax error at line {line}, collumn {column}! There may be mispelling or errors: {detail}",
+    "PPY-PARSE-002": "[PPY-PARSE-002] Multiple issues found:\n{detail}",
     "PPY-RUNTIME-001": "[PPY-RUNTIME-001] Undefined variable. Possible error: {name}",
     "PPY-RUNTIME-002": "[PPY-RUNTIME-002] Top-level AST node must be program! Found: {node_type}",
     "PPY-RUNTIME-003": "[PPY-RUNTIME-003] repeat amt(...) cannot be negative. Not possible: {count}",
@@ -14,6 +15,7 @@ ERROR_TEMPLATES = {
     "PPY-RUNTIME-006": "[PPY-RUNTIME-006] stop can only be used inside loops!",
     "PPY-RUNTIME-007": "[PPY-RUNTIME-007] restart can only be used inside repeat loops!",
     "PPY-RUNTIME-008": "[PPY-RUNTIME-008] Possible infinite loop detected. Loop exceeded safe iteration limit: {limit}",
+    ""
     "PPY-TYPE-001": "[PPY-TYPE-001] Operator '{op}' requires numbers, I got {actual_type}.",
     "PPY-TYPE-002": "[PPY-TYPE-002] execute(...) requires a string command, you gave me {actual_type}",
     "PPY-TYPE-003": "[PPY-TYPE-003] repeat amt(...) requires an integer count. You gave me {actual_type}",
@@ -30,7 +32,7 @@ ERROR_TEMPLATES = {
     "PPY-EXEC-001": "[PPY-EXEC-001] execute(...) command failed, try again or change code. (exit {return_code}): {command}",
     "PPY-FUNC-002": "[PPY-FUNC-002] {name}(...) is not a function and cannot be called.",
     "PPY-FUNC-003": "[PPY-FUNC-003] Function '{name}' expected {expected} argument(s), got {actual}.",
-    "PPY-INTERNAL-001": "[PPY-INTERNAL-001] Internal error: {detail}",
+    "PPY-INTERNAL-001": "[PPY-INTERNAL-001] Sorry, internal error occurred! Details: {detail}",
 }
 
 

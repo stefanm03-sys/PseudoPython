@@ -1,6 +1,7 @@
 # parser.py
 from lark import Lark, Transformer, v_args
 from lark.exceptions import UnexpectedInput
+import re
 
 from ppy_errors import make_error
 
@@ -121,6 +122,113 @@ _parser = Lark(
     parser="lalr",
     start="start",
 )
+
+_NAME_RE = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
+_ASSIGN_RE = re.compile(r"^([a-zA-Z_][a-zA-Z0-9_]*)\s+is\b")
+_CALL_RE = re.compile(r"^([a-zA-Z_][a-zA-Z0-9_]*)\s*\(")
+_VALID_LINE_STARTERS = {
+    "var",
+    "state",
+    "stateStr",
+    "stateInt",
+    "stateFloat",
+    "stateBool",
+    "is",
+    "do",
+    "when",
+    "butIf",
+    "else",
+    "otherwise",
+    "repeat",
+    "endpt",
+    "stop",
+    "restart",
+    "ask",
+    "execute",
+    "wait",
+    "function",
+}
+
+
+def _collect_validation_errors(source: str):
+    errors = []
+    in_slash_block = False
+    in_star_block = False
+
+    for line_no, raw in enumerate(source.splitlines(), start=1):
+        s = raw.strip()
+        if not s:
+            continue
+
+        if in_slash_block:
+            if s == "//":
+                in_slash_block = False
+            continue
+        if in_star_block:
+            if "*/" in s:
+                in_star_block = False
+            continue
+
+        if s == "//":
+            in_slash_block = True
+            continue
+        if s.startswith("/*"):
+            if "*/" not in s:
+                in_star_block = True
+            continue
+        if s.startswith("#") or s.startswith("//"):
+            continue
+
+        # Drop trailing inline comments for validation purposes.
+        if "#" in s:
+            s = s.split("#", 1)[0].rstrip()
+        if "//" in s:
+            s = s.split("//", 1)[0].rstrip()
+        if not s:
+            continue
+
+        if s in {"{", "}"}:
+            continue
+        if s.startswith("} "):
+            s = s[1:].lstrip()
+
+        if s.startswith("var "):
+            rest = s[4:].strip()
+            if not rest:
+                errors.append(f"Line {line_no}: [PPY-VALID-001] Missing variable name after 'var'.")
+                continue
+            var_name = rest.split()[0]
+            if not _NAME_RE.fullmatch(var_name):
+                errors.append(
+                    f"Line {line_no}: [PPY-VALID-001] Invalid variable name '{var_name}'."
+                )
+            continue
+
+        if s.startswith("function "):
+            rest = s[len("function "):].strip()
+            if not rest:
+                errors.append(f"Line {line_no}: [PPY-VALID-003] Missing function name after 'function'.")
+                continue
+            name = rest.split("(", 1)[0].split()[0]
+            if not _NAME_RE.fullmatch(name):
+                errors.append(
+                    f"Line {line_no}: [PPY-VALID-003] Invalid function name '{name}'."
+                )
+            continue
+
+        first = s.split()[0]
+        if first in _VALID_LINE_STARTERS:
+            continue
+        if _ASSIGN_RE.match(s):
+            continue
+        if _CALL_RE.match(s):
+            continue
+
+        errors.append(
+            f"Line {line_no}: [PPY-VALID-002] Invalid statement '{s}'."
+        )
+
+    return errors
 
 @v_args(inline=True)
 class ASTBuilder(Transformer):
@@ -271,11 +379,20 @@ def parse(source: str):
     """
     Parse PseudoPy source text into a dictionary AST.
     """
+    precheck_errors = _collect_validation_errors(source)
+
     try:
         tree = _parser.parse(source)
-        return ASTBuilder().transform(tree)
+        ast = ASTBuilder().transform(tree)
+        if precheck_errors:
+            raise make_error("PPY-PARSE-002", detail="\n".join(precheck_errors))
+        return ast
     except UnexpectedInput as exc:
         detail = str(exc).splitlines()[0] if str(exc) else "Invalid syntax"
         line = getattr(exc, "line", "?")
         column = getattr(exc, "column", "?")
-        raise make_error("PPY-PARSE-001", line=line, column=column, detail=detail) from exc
+        all_errors = list(precheck_errors)
+        all_errors.append(
+            f"Line {line}, column {column}: [PPY-PARSE-001] {detail}"
+        )
+        raise make_error("PPY-PARSE-002", detail="\n".join(all_errors)) from exc
